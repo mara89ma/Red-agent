@@ -1,0 +1,69 @@
+# engagement_profile.yaml — 비-LLM Engagement Gate가 파싱 (§1.1)
+# 표적을 하드코딩하지 않는다: 이 프로파일 + recon 사실을 입력으로 Planner가 킬체인을 인스턴스화.
+engagement:
+  name: "UAV 자율 레드팀 (uav-sim-env / KUS-FS)"
+  range_mode: container        # container | sitl | hil | live (live → 물리 HITL 최상)
+  abstract_action: A4_force_arm_takeoff   # rag/playbook.py 추상 액션 키
+
+authorization:
+  scope_cidr: ["10.50.0.0/24"] # 네트워크 계층 하드 allowlist (default-deny)
+  target_sysids: [1]           # MAVLink sysid allowlist
+  out_of_scope: ["opensand_control_plane", "sentinel_backend"]  # 레인지 붕괴 자산
+  test_window: "always"        # 비행시험창(물리 안전요원 입회). 데모는 always
+  credentials: datalink_foothold   # 통상 "5790 도달" 가정
+
+constraints:
+  blast_radius: read_only      # 기본. write는 등급상승+승인
+  data_sensitivity: high       # 미션/영상/좌표 → exfil 게이트
+  egress_policy: default-deny
+  physical_safety: "geofence + flight-termination = 인간 전용"
+
+target_profile:                # ← recon으로 채워지거나 사전 명시 (비면 Recon이 발견)
+  hosts:
+    - {id: av-muav, ip: 10.50.0.10, role: fc, stack: ardupilot, sysid: 1}
+  services:
+    # transport: tcp|udp — 실 pymavlink 연결 문자열은 "{transport}:{ip}:{port}" 로 조립됨
+    - {host: datalink-los, ip: 10.50.0.20, port: 5790, proto: mavlink, transport: tcp, auth: none}
+  datalink:
+    los: {router: mavlink-router}
+    blos: {emulator: opensand}
+    mavlink_signing: false      # 표적 사실: 무서명(A4 진입 자명)
+    arming_check: 0             # 표적 사실: bootstrap.py가 0으로 강제(환경이 공격에 유리)
+
+# sim: 시뮬레이션 레인지 초기 상태 seed (§2.9 eval 관심사).
+#   실 레인지(uav-sim-env/HIL)에서는 이 블록 대신 Gazebo/계측이 진실을 제공한다.
+#   → tools/sitl_stub.py:Range.from_profile()가 소비. 코드에 하드코딩 금지.
+sim:
+  home: {lat: 36.0000, lon: 127.0000}   # 홈/이륙 지점 (레인지별로 다름)
+  initial: {mode: STABILIZE, armed: false, in_flight: false}
+  takeoff_alt_m: 10.0                    # takeoff 명령 목표 고도
+  # ground_truth: range_mode=sitl|hil|live 일 때 out-of-band 진위 오라클 연결.
+  #   물리(고도·위치)=Gazebo가 root-of-trust. 논리(armed·mode)=SITL sim-state 별도 링크(비적대 보조).
+  #   simstate_conn: SITL 전용 sim-state 링크 (표적발 HEARTBEAT와 분리된 별도 소켓)
+  ground_truth:
+    backend: gazebo                       # gazebo(물리 root-of-trust) | sim_state(보조만)
+    simstate_conn: "udp:127.0.0.1:5762"   # SITL sim-state 전용 링크(논리 상태 보조)
+    gazebo: {world: default, model: iris} # gz topic 구독 대상(물리 pose)
+
+# observables: 환경의 '관측 가능 표면' = SOC가 탐지에 쓰는 UAV*_CL 시그니처 파라미터.
+#   ★ 출처가 MD에 명시됨: uav_mitre_attack/UAV_MITRE_ATT&CK.md (테이블·컬럼·기법 표).
+#   RedTeam은 이 값으로 '무엇이 로그에 남을지' 예측(Reporter 탐지격차)하고,
+#   Validator는 임계(GNSS drift 등) 판정에 쓴다. 코드에 하드코딩 금지 → YAML 권위.
+observables:
+  ports: {los_mavlink: 5790, sitl: 5760, novnc: 8080, vnc: 5900}   # MD L51/L184
+  legit_source_sysids: [1, 254, 255]   # MD: UAVOperator_CL SourceSystemId∉{1,254,255}=인젝션(A4)
+  sensor_thresholds:
+    pos_horiz_variance: 0.5            # MD L236/L247: UAVTelemetry_CL PosHorizVariance (S1 탐지신호)
+    gnss_drift_m: 50.0                 # 성공 판정=믿는 위치 vs 실제 괴리(§2.7, 분산 아님)
+  detection_tables:                    # 원자 액션 → 예상 UAV*_CL (MD 마스터가 1:1 명시)
+    recon_heartbeat:  {table: UAVDatalinkConn_CL, columns: [LocalPort, PeerIp]}       # MD L136
+    set_mode:         {table: UAVOperator_CL,     columns: [SourceSystemId, Command]} # MD L90/L93
+    force_arm:        {table: UAVOperator_CL,     columns: [SourceSystemId, Command]} # MD L90/L93
+    param_set_safety: {table: UAVConfigAudit_CL,  columns: [ParamId, ParamValueAfter]}# MD L217/L228
+    gnss_spoof:       {table: UAVTelemetry_CL,     columns: [PosHorizVariance, FixType]} # MD L236
+
+ops:
+  autonomy_level: autonomous   # 격리 SITL 한정. live면 semi_auto 이하
+  budget: {tokens: 200000, wallclock_s: 900, tool_calls: 40}
+  attacker_source_sysid: 250   # 인젝션 시 쓰는 SourceSystemId (∉{1,254,255} → SOC 탐지 신호)
+  attacker_ip: 10.50.0.99      # 발판 IP (scope_cidr 내). tap이 PeerIp로 기록

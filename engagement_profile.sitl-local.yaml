@@ -1,0 +1,47 @@
+# engagement_profile.sitl-local.yaml
+# 로컬 단일 호스트에서 ArduPilot SITL(+ mavlink-router)로 실동작하는 프리셋.
+# 사용: python run.py --profile engagement_profile.sitl-local.yaml
+# 전제: mavlink-router가 SITL(5760)을 받아 TcpServerPort=5790 로 노출(SETUP.md 참조).
+engagement:
+  name: "UAV 레드팀 (로컬 SITL)"
+  range_mode: sitl                     # ★ 실 pymavlink 어댑터로 스왑
+  abstract_action: A4_force_arm_takeoff
+
+authorization:
+  scope_cidr: ["127.0.0.0/24"]         # ★ 로컬 SITL이므로 루프백. 없으면 egress가 차단(fail-closed)
+  target_sysids: [1]                   # ArduPilot SITL 기본 sysid=1
+  out_of_scope: []
+  test_window: "always"
+  credentials: datalink_foothold
+
+constraints:
+  blast_radius: read_only
+  data_sensitivity: high
+  egress_policy: default-deny
+  physical_safety: "SITL 격리 — 물리 비가역은 여전히 인간 전용 HITL"
+
+target_profile:
+  hosts:
+    - {id: av-muav, ip: 127.0.0.1, role: fc, stack: ardupilot, sysid: 1}
+  services:
+    - {host: datalink-los, ip: 127.0.0.1, port: 5790, proto: mavlink, transport: tcp, auth: none}
+  datalink:
+    los: {router: mavlink-router}
+    mavlink_signing: false             # SITL 기본 무서명 → A4 진입 자명
+    arming_check: 0                     # (참고용) 실제 값은 param GET로 확인 권장
+
+sim:
+  home: {lat: 36.0000, lon: 127.0000}
+  initial: {mode: STABILIZE, armed: false, in_flight: false}
+  takeoff_alt_m: 10.0
+  ground_truth:
+    backend: sim_state                 # ★ Gazebo 불필요. SITL SIM_STATE(별도 링크)로 진위 검증
+    simstate_conn: "udp:127.0.0.1:5762" # mavlink-router의 별도 엔드포인트(공격 링크와 분리)
+    # backend: gazebo 로 올리려면 아래 주석 해제 + Gazebo 기동(SETUP.md Tier 2)
+    # gazebo: {world: default, model: iris}
+
+ops:
+  autonomy_level: semi_auto            # 실 링크에선 보수적으로
+  budget: {tokens: 200000, wallclock_s: 900, tool_calls: 40}
+  attacker_source_sysid: 250           # ∉{1,254,255} → SOC 탐지 신호
+  attacker_ip: 127.0.0.1

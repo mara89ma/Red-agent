@@ -1,0 +1,20 @@
+[
+  {"id": "T0840", "name": "Network Connection Enumeration", "tactics": ["discovery"]},
+  {"id": "T1595", "name": "Active Scanning", "tactics": ["reconnaissance"]},
+  {"id": "T0830", "name": "Adversary-in-the-Middle", "tactics": ["collection"]},
+  {"id": "T0855", "name": "Unauthorized Command Message", "tactics": ["execution"]},
+  {"id": "T0821", "name": "Modify Controller Tasking", "tactics": ["execution"]},
+  {"id": "T1692.001", "name": "MAVLink Command Injection", "tactics": ["execution"]},
+  {"id": "T1106", "name": "Native API", "tactics": ["execution"]},
+  {"id": "T0836", "name": "Modify Parameter", "tactics": ["impair-process-control"]},
+  {"id": "T0838", "name": "Modify Alarm Settings", "tactics": ["inhibit-response-function"]},
+  {"id": "T0814", "name": "Denial of Service", "tactics": ["inhibit-response-function"]},
+  {"id": "T0835", "name": "Manipulate I/O Image", "tactics": ["impair-process-control"]},
+  {"id": "T0832", "name": "Manipulation of View", "tactics": ["impact"]},
+  {"id": "T0831", "name": "Manipulation of Control", "tactics": ["impact"]},
+  {"id": "T0827", "name": "Loss of Control", "tactics": ["impact"]},
+  {"id": "T0880", "name": "Loss of Safety", "tactics": ["impact"]},
+  {"id": "T0837", "name": "Loss of Protection", "tactics": ["impact"]},
+  {"id": "T0856", "name": "Spoof Reporting Message", "tactics": ["evasion", "impair-process-control"]},
+  {"id": "T0885", "name": "Commonly Used Port", "tactics": ["command-and-control"]}
+]

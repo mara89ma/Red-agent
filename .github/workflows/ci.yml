@@ -1,0 +1,45 @@
+name: redteam-ci
+
+# 테스트 + 공격 평가 회귀 게이트를 모든 PR/푸시에서 강제(§2.9 머지 게이트).
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+
+jobs:
+  test-and-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Install (문서화된 설치 = requirements.txt 전체, LangGraph 기본 러너 포함)
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Unit tests (LangGraph 러너 — 문서 설치와 동일 경로)
+        run: python -m pytest tests/ -q
+
+      - name: Unit tests (stdlib 폴백 러너 — LangGraph 미설치 경로도 회귀 방지)
+        run: |
+          pip uninstall -y langgraph
+          python -m pytest tests/ -q
+
+      - name: Attack eval + regression gate (결정론·오프라인)
+        run: python -m benchmarks.check_gates --run
+
+      - name: Verify claims (문서 수치 재파생 + anti-fitting 정직성 가드)
+        run: python -m benchmarks.verify_claims
+
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: gitleaks (페이로드·토큰 유출 차단)
+        uses: gitleaks/gitleaks-action@v2

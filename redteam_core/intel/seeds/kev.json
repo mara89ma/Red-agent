@@ -1,0 +1,8 @@
+[
+  {"cve": "CVE-2021-3156", "vendor": "Sudo", "product": "sudo",
+   "name": "Sudo Heap-Based Buffer Overflow (foothold priv-esc 참고)"},
+  {"cve": "CVE-2020-10188", "vendor": "GNU", "product": "inetutils telnetd",
+   "name": "Telnet Buffer Overflow (레거시 datalink 관리평면 참고)"},
+  {"cve": "CVE-2019-11477", "vendor": "Linux", "product": "kernel TCP SACK",
+   "name": "TCP SACK Panic (링크 DoS 참고)"}
+]

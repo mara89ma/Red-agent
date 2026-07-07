@@ -1,0 +1,7 @@
+[
+  {"id": "AML.T0051", "name": "LLM Prompt Injection", "tactics": ["ml-attack-staging"]},
+  {"id": "AML.T0020", "name": "Poison Training Data", "tactics": ["resource-development"]},
+  {"id": "AML.T0015", "name": "Evade ML Model", "tactics": ["defense-evasion"]},
+  {"id": "AML.T0043", "name": "Craft Adversarial Data", "tactics": ["ml-attack-staging"]},
+  {"id": "AML.T0057", "name": "LLM Data Leakage", "tactics": ["exfiltration"]}
+]

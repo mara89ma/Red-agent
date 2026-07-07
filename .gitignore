@@ -1,0 +1,11 @@
+# 런타임 산출물 — 커밋하지 않음
+__pycache__/
+*.pyc
+.pytest_cache/
+# refresh --live 로컬 캐시(시드는 seeds/에 커밋)
+redteam_core/intel/cache/
+# 평가 산출(CI가 --run으로 재생성)
+benchmarks/results/
+# ③ 브릿지 산출(SOC-facing 파일) + 학습 영속 기본 경로(런타임 생성)
+out/
+.env
