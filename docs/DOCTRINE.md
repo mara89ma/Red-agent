@@ -2,13 +2,13 @@
 
 > **문서 목적**: 예선 보고서 6장(AI 에이전트 설계 및 구현)의 근거 문서.
 > 미군 사이버작전 교리에 정박한 자율 레드팀 에이전트의 아키텍처·역할·기능·검증을 정리한다.
-> **기준일**: DAH 2026 예선 · **산출**: `mara89ma/Red-agent @ feat/closed-loop-bda` (244 tests green)
+> **기준일**: DAH 2026 예선 · **산출**: `mara89ma/Red-agent @ feat/closed-loop-bda` (249 tests green)
 
 ---
 
 ## 0. 한 줄 정의
 
-결정론 레드팀 코어(scaffold/oracle/gate) 위에 **미군 사이버작전 교리에 정박한 11개 고도화 층(§A~§K)**을 코어 불변으로 얹어, red 가 방어자(blue SOC)를 상대로 **완전한 사이버 킬체인 + JP 3-60 타게팅 사이클 + JP 3-0 합동기능**을 수행하는 자율 에이전트.
+결정론 레드팀 코어(scaffold/oracle/gate) 위에 **미군 사이버작전 교리에 정박한 12개 고도화 층(§A~§L)**을 코어 불변으로 얹어, red 가 방어자(blue SOC)를 상대로 **완전한 사이버 킬체인 + JP 3-60 타게팅 사이클 + JP 3-0 합동기능**을 수행하는 자율 에이전트.
 
 ---
 
@@ -18,11 +18,11 @@
 - **3 기둥**: scaffold(능력)=무엇을 할 수 있나 · oracle(진위)=정말 일어났나 · gate(안전)=해도 되나.
 - **불변식 D8**: red(fried-pollack-ai) ↔ blue(pollack-ai, SOC)는 **코드 결합 없음**(동언님 `ARCHITECTURE.md:93`). 유일 접점은 단방향 `UAV*_CL` 브릿지. 교리상 OCO/DCO 권한 분리와 정합.
 - **탐지 임계의 위치(정정)**: blue 룰의 탐지 임계는 **대부분 `UAV_Threshold_List` watchlist 로 외부화**(S3·S9·S15·S16·S22·S25·C2·C3·C5 등 — `ThresholdKey/Value` 행, 쿼리 무수정 튜닝). 예외적으로 S6(`FailCount>=5/3`)·S1(`zScoreThreshold=3.0`·`gateMultiplier=1.5`)은 쿼리 리터럴. §A 는 이 룰 정의에서 임계를 **수동 씨앗 복사**할 뿐 pollack-ai/룰 repo 에 런타임 의존하지 않는다(D8 준수).
-- **결정론 Tier-0**: 전 층이 LLM/네트워크/SITL 없이 실행·검증 가능(§K 전송만 loopback).
+- **결정론 Tier-0**: 전 층이 LLM/네트워크/SITL 없이 실행·검증 가능(§K 전송·§L 지속만 실 소켓/FS, loopback 실검증).
 
 ---
 
-## 2. 11층 아키텍처 스택
+## 2. 12층 아키텍처 스택
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
@@ -35,7 +35,7 @@
 ├──────────────────────────────────────────────────────────────┤
 │ §B RoE 교전권한 게이트(권한·PID·ConOps·CDE·JCEOI)            │  교전통제
 ├──────────────────────────────────────────────────────────────┤
-│ §C EMSO 전자전(J/S·포획) │ §K 실 전송(TCP C2·UDP/HTTP 전달)  │  효과·전송
+│ §C EMSO(J/S·포획) │ §K 실전송(C2·전달) │ §L 설치/지속(발판)   │  효과·전송·지속
 ├──────────────────────────────────────────────────────────────┤
 │ [동언 코어] recon→planner→checker→broker→hitl→executor→       │  결정론 실행
 │             validator→reflection→reporter · 3기둥 · 22액션    │
@@ -57,7 +57,8 @@
 | §H | `deception/` | 미끼로 SOC 분석주의 포화 → 진짜 공격 은폐. blue S8/S9 임계 역이용 | JP 3-13.4 MILDEC |
 | §I | `sustainment/` | TTP 소모(burn) 순환: 탐지된 TTP 는 시그니처 노출로 소진 → 목표별 지속력 산정 | JP 3-0/4-0 Sustainment |
 | §J | `killchain/` | 7단계 오케스트레이션: 전달 벡터·지속성(발판/임플란트)·C2(상용포트/불량라우터) 채워 end-to-end 관통 판정 | Lockheed Kill Chain |
-| §K | `transport/` | 실 전송: TCP C2 비콘 채널 + UDP(mavlink-router)/HTTP(스텁) 전달. loopback 실검증 | 킬체인 3·6단계 실체화 |
+| §K | `transport/` | 실 전송: TCP C2 지속비콘(자동 재접속) + UDP(GPS/PARAM/MISSION 프레임)/HTTP 전달. loopback 실검증 | 킬체인 3·6단계 실체화 |
+| §L | `persistence/` | 설치/지속 실 메커니즘: FileImplant(재부팅 생존 검증)·ParamImplant(EEPROM 백도어)·Foothold 오케스트레이션 | 킬체인 5단계 실체화 |
 
 ---
 
@@ -124,10 +125,10 @@
 |---|---|---|---|
 | 1 | 정찰 Recon | ✅ | recon·active_scan·§A·§F |
 | 2 | 무기화 Weaponization | ✅ | 무기고 catalog(23기법)·§C |
-| 3 | 전달 Delivery | ✅ | §J 도달성 + §K 실전송(UDP/HTTP) |
+| 3 | 전달 Delivery | ✅ 실전송 | §K UDP(GPS/PARAM/MISSION 프레임)·HTTP — loopback 실증 |
 | 4 | 악용 Exploitation | ✅ | force_arm·gnss_spoof 포획·§C |
-| 5 | 설치/지속 Installation | ✅ | §J 지속성(발판/임플란트)·§I |
-| 6 | C2 | ✅ | §J + §K 실 TCP 비콘(T0885) |
+| 5 | 설치/지속 Installation | ✅ 실 메커니즘 | §L FileImplant(재부팅 생존)·ParamImplant(EEPROM 백도어)·§I |
+| 6 | C2 | ✅ 실전송 | §K 실 TCP 지속비콘(자동 재접속, T0885) |
 | 7 | 목표행동 Actions | ✅ | §E·§D·§H |
 
 **관통 실증**: GNSS 표적 은밀기법 → 🥷 은밀 관통 / 소란기법 → 완전 관통(탐지) / 무장 표적 → 6단계 도달하나 목표행동 견고 차단(미완주).
@@ -147,11 +148,11 @@
 
 ## 7. 검증 상태
 
-- **244 테스트 green** (동언 코어 182 불변 + 고도화 62), 전부 결정론 Tier-0.
-- 층별 실행 데모 11종: `benchmarks/{closed_loop,roe,emso,combat,replan,targeting,maneuver,deception,sustainment,killchain}_eval.py`.
+- **249 테스트 green** (동언 코어 182 불변 + 고도화 67), 전부 결정론 Tier-0(§K/§L만 실 소켓/FS loopback).
+- 층별 실행 데모 12종: `benchmarks/{closed_loop,roe,emso,combat,replan,targeting,maneuver,deception,sustainment,killchain,infra}_eval.py`.
 - 산출: `github.com/mara89ma/Red-agent @ feat/closed-loop-bda`, 12 커밋.
 
 ## 8. 남은 작업 (본선)
 
-- 실 인프라 라이브 검증: §K 실전송을 실제 uav-sim-env SITL/mavlink-router/FastAPI 스텁 엔드포인트로 연결(env 지정). 현재는 loopback 실검증.
+- **라이브 스모크만 잔여**: §K 전송·§L 지속의 코드 경로·전송은 완성(loopback 실증). 실제 uav-sim-env SITL/mavlink-router/FastAPI 스텁 엔드포인트로 env 지정(`MAVLINK_ENDPOINT`/`C2_HOST`/`STUB_URL`) 후 1회 라이브 스모크만 남음(SITL 클러스터 필요).
 - 실 Sentinel 관측: §A BDA 의 관측 채널을 오프라인 룰-평가에서 라이브 Log Analytics Incident 조회로 스왑.
