@@ -29,6 +29,11 @@ OBJECTIVES = {
     "network_recon": ["active_scan"],                # S34: 능동 정찰(→ S6 탐지)
     "recon_access": ["active_scan"],                # 정찰/자격증명
     "weapon_effect": ["force_arm", "unauthorized_command"],  # 둘 다 범주형 → 견고
+    # ── 데이터 유출(Exfiltration) 계열 — 전용 탐지룰 미배포=사각지대 ──
+    "data_exfiltration": ["exfil_bulk"],             # S35: 대량 영상/SAR 유출
+    "covert_exfil": ["exfil_c2_covert"],             # S36: C2 채널 은닉 유출(T1041)
+    "staged_exfil": ["exfil_staged"],                # S37: 스테이징 후 분할 유출(T1074/T1030)
+    "crypto_key_exfil": ["steal_crypto_key"],        # S38: 암호키 유출(→ 서명 위조로 S18 우회)
 }
 
 # 연속 액션의 '효과 바닥' — 이 미만이면 효과 미달. blue 임계와의 관계가 회피창을 정함.
