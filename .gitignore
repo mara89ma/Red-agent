@@ -9,3 +9,4 @@ benchmarks/results/
 # ③ 브릿지 산출(SOC-facing 파일) + 학습 영속 기본 경로(런타임 생성)
 out/
 .env
+out/
