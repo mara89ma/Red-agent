@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from typing import List, Optional
 
 from ..assessment.bda import assess_action
+from .adaptive import AdaptivePayloadGenerator, SituationContext
 from .adversarial import generate_adversarial_specs
 from .extraction import generate_extraction_ladder
 from .prompt_inject import generate_prompt_injections
@@ -44,6 +45,13 @@ def run_model_extraction() -> List[PayloadOutcome]:
 def run_adversarial() -> List[PayloadOutcome]:
     return [_outcome("S7", "ml_craft_adversarial", a.sid, f"{a.patch_type}:{a.target_misclass}")
             for a in generate_adversarial_specs()]
+
+
+def run_adaptive(ctx: SituationContext) -> List[PayloadOutcome]:
+    """상황 맞춤 페이로드를 생성해 탐지 파이프라인에 흘린다."""
+    action = "ml_extract_secret" if ctx.scenario == "S33" else "ml_prompt_inject"
+    payloads = AdaptivePayloadGenerator().generate(ctx)
+    return [_outcome(ctx.scenario, action, p.pid, p.text) for p in payloads]
 
 
 def bypass_rate(outcomes: List[PayloadOutcome]) -> float:

@@ -15,13 +15,15 @@ from .prompt_inject import CONVERTERS, generate_prompt_injections
 from .extraction import generate_extraction_ladder
 from .adversarial import generate_adversarial_specs
 from .run import (
-    PayloadOutcome, bypass_rate, run_adversarial, run_model_extraction,
-    run_prompt_injection,
+    PayloadOutcome, bypass_rate, run_adaptive, run_adversarial,
+    run_model_extraction, run_prompt_injection,
 )
+from .adaptive import AdaptivePayload, AdaptivePayloadGenerator, SituationContext
 
 __all__ = [
     "CONVERTERS", "generate_prompt_injections",
     "generate_extraction_ladder", "generate_adversarial_specs",
-    "PayloadOutcome", "bypass_rate", "run_adversarial",
+    "PayloadOutcome", "bypass_rate", "run_adaptive", "run_adversarial",
     "run_model_extraction", "run_prompt_injection",
+    "AdaptivePayload", "AdaptivePayloadGenerator", "SituationContext",
 ]
