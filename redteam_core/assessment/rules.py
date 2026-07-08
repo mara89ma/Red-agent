@@ -1,7 +1,13 @@
 """blue 탐지 룰 스펙 — dah-sentinel-content 의 실제 S1~S28 KQL 에서 씨앗 추출.
 
-D8 준수: 여기 담기는 것은 blue 의 **공유 산출물(룰 임계/조건)** 이지 pollack-ai
-(SOC 에이전트) 코드가 아니다. 각 스펙에 출처(파일·triggerThreshold)를 명시한다.
+D8 준수: 여기 담기는 것은 blue 의 룰 정의(공유 산출물)에서 **수동 씨앗 복사**한
+임계/조건일 뿐, pollack-ai(SOC 에이전트) 코드도 룰 repo 런타임 의존도 아니다.
+각 스펙에 출처(파일·triggerThreshold)를 provenance 로 명시한다.
+
+임계 위치 참고(정정): blue 룰 임계는 대부분 `UAV_Threshold_List` watchlist 로
+외부화(ThresholdKey/Value) 돼 있어 §A 보정값을 watchlist 갱신으로 반영 가능하다.
+단 아래 씨앗 중 S6(FailCount>=5/3)·S1(zScore=3.0·gateMultiplier=1.5)은 쿼리
+리터럴이라, 이 둘의 보정은 쿼리 임계 수정이 필요하다.
 
 `kind`:
   - continuous : 임계가 연속값 → red 가 강도를 낮춰 탐지 경계를 이분 탐색 가능(보정 대상).
