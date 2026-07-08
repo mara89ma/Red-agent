@@ -12,17 +12,29 @@ import os
 from dataclasses import dataclass, field
 from typing import List, Optional, Tuple
 
-# APT → 순서 있는 킬체인 패턴(대표). ATT&CK Group 운용 특성 반영.
+# APT → 순서 있는 킬체인 패턴(확장). ATT&CK Group 운용 특성 반영.
+# 정찰(S34)로 시작해 7단계 킬체인을 최대한 커버.
 APT_EMULATION = {
-    "Sandworm (G0034)": ["S4", "S19", "S23", "S25"],        # 공급망→failsafe→서비스중단→DoS
-    "APT28 (G0007)": ["S6", "S10", "S15", "S11", "S17"],    # 자격증명→모바일→야간명령→무장→유출
-    "Volt Typhoon (G1017)": ["S6", "S26", "S24"],           # 자격증명→라우터→데이터링크(LOTL)
-    "EW Threat Cluster": ["S1", "S30", "S3", "S9"],          # 스푸핑→재밍→SATCOM MITM→무력화
-    "AML Adversary (ATLAS)": ["S5", "S32", "S33", "S7"],     # RAG→인젝션→추출→온보드
+    # ── 기존 5개(확장) ──
+    "Sandworm (G0034)": ["S34", "S4", "S21", "S19", "S20", "S23", "S25"],   # OT 파괴
+    "APT28 (G0007)": ["S34", "S6", "S10", "S13", "S15", "S11", "S17"],      # 방산 espionage
+    "Volt Typhoon (G1017)": ["S34", "S6", "S27", "S26", "S24", "S2"],       # LOTL 인프라
+    "EW Threat Cluster": ["S1", "S30", "S31", "S3", "S9", "S18"],           # 전자전 확전
+    "AML Adversary (ATLAS)": ["S29", "S7", "S32", "S33", "S8"],             # AI 계층(전 단계 미배포)
+    # ── 신규 3개(한국 방산 관련 DPRK + 항공우주) ──
+    "Lazarus (G0032)": ["S34", "S6", "S4", "S11", "S23", "S25"],            # DPRK 파괴·탈취
+    "Kimsuky (G0094)": ["S34", "S6", "S10", "S12", "S17"],                  # DPRK ROK 방산 espionage
+    "APT33 (G0064)": ["S34", "S4", "S1", "S11"],                            # 항공우주 표적
 }
 
-# campaigns 에 없는 시나리오의 알려진 탐지상태(배포=탐지 / 미배포=사각).
-_EXTRA_STATIC = {"S3": True, "S5": True, "S9": True, "S10": True, "S7": None}
+# campaigns 에 없는 시나리오의 탐지상태 — **배포된 S1~S28 룰 기준**.
+# 배포룰 존재=탐지(True) / 미배포(S7·S29·군집·AI계열)=사각(None).
+_EXTRA_STATIC = {
+    "S2": True, "S3": True, "S5": True, "S9": True, "S10": True, "S18": True,
+    "S19": True, "S21": True, "S23": True, "S24": True, "S25": True,
+    "S26": True, "S27": True,
+    "S7": None, "S29": None,                       # 미배포 = 사각지대
+}
 
 
 def _exec(sid: str) -> Tuple[bool, Optional[bool]]:

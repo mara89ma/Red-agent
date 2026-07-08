@@ -28,7 +28,8 @@ def main() -> None:
         print(f"[{actor}] {head}")
         print(f"     {flow}{note}\n")
     print("해석: 실 APT 킬체인 순서로 에뮬레이션 → blue 방어가 각 APT를 어디서 잡는지 실증.")
-    print("      AML Adversary(AI 계열)가 사각 단계 최다 = 방어 최우선.")
+    print("      AML Adversary(AI 계열)는 전 단계 미배포 = 완전 은밀 → AI 계층 방어 최우선.")
+    print("      한국 방산 관련 Lazarus·Kimsuky 포함(DPRK ROK 표적).")
 
 
 if __name__ == "__main__":
