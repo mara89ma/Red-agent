@@ -38,6 +38,8 @@ _SCENARIO_STATIC = {
     "S39": None, "S40": None, "S41": None, "S42": None,
     # 고급(S43~S47, §W) — RC링크·DShot·anti-forensics 전용 탐지룰 미배포 = 사각지대.
     "S43": None, "S44": None, "S45": None, "S46": None, "S47": None,
+    # Web/API·Linux 권한상승(S48~S52) — UAV Sentinel 밖 IT 계층 = 사각지대(§T 탐지).
+    "S48": None, "S49": None, "S50": None, "S51": None, "S52": None,
 }
 
 # 캠페인 체인(신규 C8~C10 포함). C1~C7 은 대조용 일부만.
@@ -50,6 +52,7 @@ CHAINS = {
     "C10": ["S30", "S1", "S17"],        # GNSS재밍(사각)→은밀 스푸핑→SAR 유출
     "C11": ["S6", "S38", "S17"],        # 자격증명→암호키 유출→(서명위조로 S18우회)인증 유출
     "C12": ["S6", "S37", "S35"],        # 자격증명→스테이징→대량 영상/SAR 유출
+    "C13": ["S6", "S49", "S51", "S52"],  # 자격증명→웹셸업로드→컨테이너escape→cron지속(IT 킬체인)
 }
 
 
