@@ -2,13 +2,13 @@
 
 > **문서 목적**: 예선 보고서 6장(AI 에이전트 설계 및 구현)의 근거 문서.
 > 미군 사이버작전 교리에 정박한 자율 레드팀 에이전트의 아키텍처·역할·기능·검증을 정리한다.
-> **기준일**: DAH 2026 예선 · **산출**: `mara89ma/Red-agent @ feat/closed-loop-bda` (249 tests green)
+> **기준일**: DAH 2026 예선 · **산출**: `mara89ma/Red-agent @ feat/closed-loop-bda` (306 tests green)
 
 ---
 
 ## 0. 한 줄 정의
 
-결정론 레드팀 코어(scaffold/oracle/gate) 위에 **미군 사이버작전 교리에 정박한 12개 고도화 층(§A~§L)**을 코어 불변으로 얹어, red 가 방어자(blue SOC)를 상대로 **완전한 사이버 킬체인 + JP 3-60 타게팅 사이클 + JP 3-0 합동기능**을 수행하는 자율 에이전트.
+결정론 레드팀 코어(scaffold/oracle/gate) 위에 **미군 사이버작전 교리에 정박한 15개 고도화 층(§A~§O)**을 코어 불변으로 얹어, red 가 방어자(blue SOC)를 상대로 **완전한 사이버 킬체인 + JP 3-60 타게팅 사이클 + JP 3-0 합동기능**을 수행하는 자율 에이전트. §M~§O 는 신규 시나리오/캠페인·KPI·외부 도구 연동(TI·APT 에뮬레이션)을 더한다.
 
 ---
 
@@ -22,7 +22,7 @@
 
 ---
 
-## 2. 12층 아키텍처 스택
+## 2. 15층 아키텍처 스택
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
@@ -59,6 +59,9 @@
 | §J | `killchain/` | 7단계 오케스트레이션: 전달 벡터·지속성(발판/임플란트)·C2(상용포트/불량라우터) 채워 end-to-end 관통 판정 | Lockheed Kill Chain |
 | §K | `transport/` | 실 전송: TCP C2 지속비콘(자동 재접속) + UDP(GPS/PARAM/MISSION 프레임)/HTTP 전달. loopback 실검증 | 킬체인 3·6단계 실체화 |
 | §L | `persistence/` | 설치/지속 실 메커니즘: FileImplant(재부팅 생존 검증)·ParamImplant(EEPROM 백도어)·Foothold 오케스트레이션 | 킬체인 5단계 실체화 |
+| §M | `campaigns/` | 신규 시나리오 S30~S34(재밍·AI공격) + 캠페인 체인 C8~C10 실행·탐지 프로파일 | 시나리오 보강 |
+| §N | `kpi/` | KPI 10종: 방어공백·dwell·임계보정·MITRE·RoE·재타격·MEA·임무영향·MOE지표·BDA신뢰 | JP 3-60/3-12/5-0 평가 |
+| §O | `integrations/` | 외부 도구 opt-in seam: AI공격(PyRIT/Garak)·Caldera·SITL·TI(위협행위자)·APT 에뮬레이션(8 APT) | 실 연동(env) |
 
 ---
 
@@ -148,8 +151,11 @@
 
 ## 7. 검증 상태
 
-- **249 테스트 green** (동언 코어 182 불변 + 고도화 67), 전부 결정론 Tier-0(§K/§L만 실 소켓/FS loopback).
-- 층별 실행 데모 12종: `benchmarks/{closed_loop,roe,emso,combat,replan,targeting,maneuver,deception,sustainment,killchain,infra}_eval.py`.
+- **306 테스트 green** (동언 코어 182 불변 + 고도화 124), 전부 결정론 Tier-0(§K/§L/§O만 실 소켓/FS·env seam).
+- 층별 실행 데모 20+종: `benchmarks/*_eval.py` (closed_loop·roe·emso·combat·replan·targeting·maneuver·deception·sustainment·killchain·infra·campaign_chains·s30·s31_34·kpi_report·integrations·threat_intel·apt_emulation …).
+- **§N KPI 요지**: 사각지대율·은밀관통 캠페인·임계보정·MEA·임무영향(MRT-C) 등 JP 3-60/3-12/5-0 평가 지표 커버(시간지표 MTTD만 라이브).
+- **§O 외부연동**: 전부 opt-in seam(env→real / 미지정→결정론 폴백). APT 에뮬레이션 8종(한국 방산 관련 Lazarus·Kimsuky 포함).
+- **핵심 발견(§M~§O)**: **AI 계층(RAG·온보드AI·프롬프트인젝션·모델추출·군집)이 전부 blue 미배포 = 유일한 완전 은밀 관통 APT(AML)**. 방어 보강 1순위=AI 계층, 2순위=GNSS/C2 재밍(S30/S31).
 - 산출: `github.com/mara89ma/Red-agent @ feat/closed-loop-bda`, 12 커밋.
 
 ## 8. 남은 작업 (본선)
