@@ -160,7 +160,7 @@
 
 ## 7. 검증 상태
 
-- **388 테스트 green** (동언 코어 182 불변 + 고도화 206), 전부 결정론 Tier-0(§K/§L/§Q/§T/§U/§X만 실 소켓/FS·env seam).
+- **399 테스트 green** (동언 코어 182 불변 + 고도화 217), 전부 결정론 Tier-0(§K/§L/§Q/§T/§U/§X만 실 소켓/FS·env seam).
 - 층별 실행 데모 20+종: `benchmarks/*_eval.py` (closed_loop·roe·emso·combat·replan·targeting·maneuver·deception·sustainment·killchain·infra·campaign_chains·s30·s31_34·kpi_report·integrations·threat_intel·apt_emulation …).
 - **§P KPI 요지**: 사각지대율·은밀관통 캠페인·임계보정·MEA·임무영향(MRT-C) 등 JP 3-60/3-12/5-0 평가 지표 커버(시간지표 MTTD만 라이브).
 - **§Q 외부연동**: 전부 opt-in seam(env→real / 미지정→결정론 폴백). APT 에뮬레이션 8종(한국 방산 관련 Lazarus·Kimsuky 포함).
