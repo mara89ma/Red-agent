@@ -11,14 +11,14 @@ from redteam_core.integrations import ai_attack, caldera, integration_status, si
 @pytest.fixture(autouse=True)
 def _clear_env(monkeypatch):
     for k in ("AI_ATTACK_PROVIDER", "AI_TARGET_URL", "CALDERA_URL",
-              "CALDERA_API_KEY", "MAVLINK_ENDPOINT"):
+              "CALDERA_API_KEY", "MAVLINK_ENDPOINT", "TAXII_URL", "TAXII_COLLECTION"):
         monkeypatch.delenv(k, raising=False)
 
 
 def test_all_fallback_without_env():
     st = integration_status()
     assert all(v["mode"] == "fallback" for v in st.values())
-    assert set(st) == {"ai_attack", "caldera", "sitl"}
+    assert set(st) == {"ai_attack", "caldera", "sitl", "threat_intel"}
 
 
 def test_ai_attack_fallback_is_blindspot():
