@@ -1,0 +1,29 @@
+# RoE 교전 프로파일 — 선언형 결정론 게이트 입력 (고도화 §B).
+# 이 작전에 위임된 교전권한과 수칙을 명시. 게이트는 프롬프트가 아니라 이 표를 강제.
+
+# 이 작전에 위임된 최고 교전권한 (NONE|LOW|COMPONENT|JFC|NATIONAL)
+available_authority: COMPONENT
+
+# 작전개념 — 허용된 공격효과(D4M) 밖이면 RoE 위반(BLOCKED)
+conops:
+  mission: "안흥 시험장 KUS-FS UAS 레드팀 평가 (시험창 내)"
+  permitted_effects:
+    - Collect            # 정찰·수집
+    - Manipulate         # 스푸핑·기만
+    - Deny(Disrupt)      # 일시 무력화
+  # 주의: Deny(Destroy)(무장·비행종단 등)는 ConOps 미포함 → 자동 BLOCKED
+
+# 적극식별(PID)이 필수인 위험계층 (SROE)
+pid_required_for:
+  - write_highrisk
+  - physical_irreversible
+
+# 우군/보호 자산 (fratricide 방지) — 교전 시 BLOCKED
+no_strike_list: [1, 254, 255]
+
+# 제한표적(RTL) — 특별승인 없이 교전 불가
+restricted_targets: []
+
+# 스펙트럼 데컨플릭션(JCEOI) — 전자전(jam/gnss_spoof) 방사 승인 여부 (JP 3-85)
+spectrum:
+  jceoi_deconflicted: false     # 미승인 = EW 방사 BLOCKED (fail-safe)
