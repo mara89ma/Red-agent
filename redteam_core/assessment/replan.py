@@ -22,6 +22,7 @@ from .rules import action_to_rule
 # 목표(효과) → 이를 달성하는 TTP 대안(선호순). jam 은 현재 blue 미매핑=사각지대.
 OBJECTIVES = {
     "nav_denial": ["gnss_spoof", "jam"],            # 항법 거부: 스푸핑→(불가시)재밍
+    "nav_jam_denial": ["jam"],                       # S30: GNSS 재밍 단독(항법 거부, 사각지대)
     "recon_access": ["active_scan"],                # 정찰/자격증명
     "weapon_effect": ["force_arm", "unauthorized_command"],  # 둘 다 범주형 → 견고
 }
