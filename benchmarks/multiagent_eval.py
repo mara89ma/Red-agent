@@ -12,21 +12,22 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from redteam_core.orchestration import run_multi_agent_campaign      # noqa: E402
+from redteam_core.orchestration import run_cmt_campaign      # noqa: E402
 
 OBJECTIVES = ["nav_jam_denial", "recon_access", "weapon_effect", "soc_llm_inject"]
 
 
 def main() -> None:
-    print("=== fried-pollack-ai · 멀티에이전트 레드팀 §Q ===\n")
+    print("=== fried-pollack-ai · 사이버전투임무팀(CMT) — 미군 사이버작전 조직 ===\n")
     for obj in OBJECTIVES:
-        r = run_multi_agent_campaign(obj)
+        r = run_cmt_campaign(obj)
         head = ("🥷 은밀 성공" if r.stealthy else "✅ 성공(탐지)" if r.success else "⛔ 실패")
-        print(f"[{obj}] {head}")
+        print(f"[{obj}] {head}  (권한 {'승인' if r.authorized else '차단'})")
         for role in r.roles:
-            print(f"   {role.role:<9}: {role.summary}")
+            print(f"   {role.role:<5}{role.title:<32}: {role.summary}")
         print()
-    print("역할 분담: recon(§F+TI 표적/위협) → exploit(§E 적응교전) → C2(§O 연동).")
+    print("직무 협업: MC(교전권한 §B) → TDNA(표적개발 §F·TI) → ION(온넷실행 §E) → BDA(§D·§A).")
+    print("교리: USCYBERCOM 사이버임무군(CMF) OCO 수행 CMT.")
 
 
 if __name__ == "__main__":

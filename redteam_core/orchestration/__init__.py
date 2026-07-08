@@ -1,12 +1,13 @@
-"""orchestration — 멀티에이전트 레드팀 역할 분담 (고도화 §Q).
+"""orchestration — 사이버전투임무팀(CMT) 직무 협업.
 
-recon/exploit/C2 역할 에이전트가 각자 담당 층을 호출하며 킬체인을 협업 수행한다
-(대화 초기 비전의 실현). 결정론: 각 역할은 기존 층의 조합 래퍼.
-  - ReconAgent  : §F 표적개발 + TI 위협행위자 프로파일
-  - ExploitAgent: §E 적응교전 + §C EMSO(효과)
-  - C2Agent     : §O 연동(C2 채널)·§L 지속
-판정권은 여전히 모델 밖(각 역할은 결정론 층 호출).
+미군 사이버작전 조직(USCYBERCOM CMF)의 OCO 수행 CMT 로 구조화.
+직무(work roles) 협업: MC(Mission Commander) → TDNA(Target Digital Network
+Analyst) → ION(Interactive On-Net Operator) → BDA(All-Source/BDA Analyst).
+결정론: 각 직무는 기존 층의 조합 래퍼. 판정권은 모델 밖.
 """
-from .coordinator import MultiAgentResult, RoleResult, run_multi_agent_campaign
+from .coordinator import (
+    MultiAgentResult, RoleResult, run_cmt_campaign, run_multi_agent_campaign,
+)
 
-__all__ = ["MultiAgentResult", "RoleResult", "run_multi_agent_campaign"]
+__all__ = ["MultiAgentResult", "RoleResult", "run_cmt_campaign",
+           "run_multi_agent_campaign"]
