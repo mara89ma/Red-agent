@@ -16,10 +16,12 @@ from .loop import CalibrationRecord, probe_boundary, run_closed_loop
 from .combat import (
     CombatAssessment, ReattackRecommendation, assess_combat, run_engagement,
 )
+from .replan import CampaignResult, OBJECTIVES, adaptive_engage
 
 __all__ = [
     "DETECTION_RULES", "RuleSpec", "action_to_rule",
     "DetectionOutcome", "assess_action",
     "CalibrationRecord", "probe_boundary", "run_closed_loop",
     "CombatAssessment", "ReattackRecommendation", "assess_combat", "run_engagement",
+    "CampaignResult", "OBJECTIVES", "adaptive_engage",
 ]
