@@ -5,5 +5,7 @@
 핵심 산출: 어느 단계에서 blue 가 체인을 잡는가(= 방어 상관룰 유효성).
 """
 from .chains import CHAINS, ChainResult, run_chain
+from .detail import ChainDetail, StageDetail, chain_detail
 
-__all__ = ["CHAINS", "ChainResult", "run_chain"]
+__all__ = ["CHAINS", "ChainResult", "run_chain",
+           "ChainDetail", "StageDetail", "chain_detail"]
