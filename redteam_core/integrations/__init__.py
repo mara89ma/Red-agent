@@ -7,7 +7,7 @@
   - caldera   : MITRE Caldera REST (C1~C10 캠페인 오케스트레이션)
   - sitl      : ArduPilot SITL/mavlink-router (§K/§C 실 텔레메트리, env 표적)
 """
-from . import ai_attack, caldera, sitl, threat_intel
+from . import ai_attack, apt_emulation, caldera, sitl, threat_intel
 
 
 def integration_status() -> dict:
@@ -17,7 +17,9 @@ def integration_status() -> dict:
         "caldera": caldera.status(),
         "sitl": sitl.status(),
         "threat_intel": threat_intel.status(),
+        "apt_emulation": apt_emulation.status(),
     }
 
 
-__all__ = ["ai_attack", "caldera", "sitl", "threat_intel", "integration_status"]
+__all__ = ["ai_attack", "apt_emulation", "caldera", "sitl", "threat_intel",
+           "integration_status"]
