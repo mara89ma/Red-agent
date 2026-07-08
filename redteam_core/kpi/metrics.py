@@ -142,9 +142,108 @@ def reattack_efficiency() -> dict:
     }
 
 
+# ── 7순위: MEA (무장효과평가 = TTP 신뢰성) ───────────────────────────────────
+def mea_reliability() -> dict:
+    """각 TTP가 설계대로 효과를 낸 비율(JP 3-60 MEA). EW는 지오메트리별 반복."""
+    from ..emso import plan_emso
+    per: Dict[str, float] = {}
+    jam_conds = [{"jammer_eirp_dbm": 40, "jammer_dist_m": 100},
+                 {"jammer_eirp_dbm": 30, "jammer_dist_m": 800},
+                 {"jammer_eirp_dbm": -10, "jammer_dist_m": 20000}]
+    jr = [plan_emso("jam", {**c, "signal_eirp_dbm": 16, "signal_dist_m": 20000,
+                            "freq_mhz": 2437}).effect.achieved for c in jam_conds]
+    per["jam"] = round(sum(jr) / len(jr), 2)
+    spoof_conds = [{"spoof_eirp_dbm": 20, "spoof_dist_m": 100},
+                   {"spoof_eirp_dbm": 0, "spoof_dist_m": 5000},
+                   {"spoof_eirp_dbm": -20, "spoof_dist_m": 20000}]
+    sr = [plan_emso("gnss_spoof", {**c, "freq_mhz": 1575.42}).effect.achieved for c in spoof_conds]
+    per["gnss_spoof"] = round(sum(sr) / len(sr), 2)
+    for t in ("force_arm", "unauthorized_command", "active_scan",
+              "ml_prompt_inject", "ml_extract_secret"):
+        per[t] = 1.0                                    # 결정론 스텁/범주형 = 설계대로
+    return {"per_ttp": per, "mea_overall": round(sum(per.values()) / len(per), 3)}
+
+
+# ── 8순위: 임무영향 / MRT-C (임무 보증) ──────────────────────────────────────
+# 목표 → (임무수준 효과, 임무 중요도). defender 임무를 실제로 저하시켰나.
+MISSION_EFFECT = {
+    "nav_denial": ("항법 상실(임무 이탈)", 5),
+    "nav_jam_denial": ("항법 거부(재밍)", 5),
+    "c2_jam_denial": ("통제 상실(통신 거부)", 5),
+    "weapon_effect": ("비인가 무장", 5),
+    "soc_llm_inject": ("SOC 판단 오염", 4),
+    "model_extraction": ("모델 유출", 3),
+    "recon_access": ("자격증명 유출", 3),
+    "network_recon": ("정찰 노출", 2),
+}
+
+
+def mission_impact() -> dict:
+    from ..assessment import adaptive_engage
+    rows: Dict[str, dict] = {}
+    ach_w = tot_w = 0
+    for obj, (effect, crit) in MISSION_EFFECT.items():
+        r = adaptive_engage(obj)
+        ok = r.verdict == "achieved"
+        stealthy = ok and r.trace[-1][2].detected is not True
+        rows[obj] = {"mission_effect": effect, "criticality": crit,
+                     "achieved": ok, "stealthy": stealthy}
+        tot_w += crit
+        ach_w += crit if ok else 0
+    return {"per_objective": rows,
+            "mission_degradation_index": round(ach_w / tot_w, 3) if tot_w else 0.0,
+            "affected_mrt_c": [v["mission_effect"] for v in rows.values() if v["achieved"]]}
+
+
+# ── 9순위: MOE 지표 계층 (JP 5-0) ─────────────────────────────────────────────
+def moe_indicators() -> dict:
+    cg = coverage_gap()
+    mi = mission_impact()
+    d = [v for v in dwell().values() if v is not None]
+    return {
+        "MOE1_effect_achievement": {
+            "mission_degradation_index": mi["mission_degradation_index"],
+            "affected_mrt_c_count": len(mi["affected_mrt_c"]),
+        },
+        "MOE2_survivability": {
+            "blind_spot_ratio": cg["blind_spot_ratio"],
+            "stealthy_campaign_ratio": cg["stealthy_campaign_ratio"],
+            "avg_steps_to_detection": round(sum(d) / len(d), 2) if d else None,
+        },
+    }
+
+
+# ── 10순위: BDA 신뢰수준 · 데컨플릭션 · OPSEC ────────────────────────────────
+def assessment_quality() -> dict:
+    from ..roe import check_deconfliction, load_roe_profile
+    # BDA 신뢰수준: 범주형=High, 연속=Medium, 사각(미매핑)=Low.
+    conf = {"High": 0, "Medium": 0, "Low": 0}
+    detected = 0
+    total = 0
+    for sid, (action, _i) in _SCENARIO_ACTION.items():
+        c = _classify(action)
+        conf["High" if c in ("robust",) else "Low" if c == "blind" else "Medium"] += 1
+        total += 1
+        if c in ("robust", "detected_only"):
+            detected += 1
+    # 데컨플릭션: EW 를 no-strike 표적에 → 위반 집계.
+    prof = load_roe_profile()
+    viol = 0
+    for a in ("jam", "gnss_spoof"):
+        r = check_deconfliction(a, {"sysid": 1}, prof)   # sysid 1 = no-strike(우군)
+        viol += len(r.conflicts)
+    return {
+        "bda_confidence": conf,
+        "opsec_exposure_ratio": round(detected / total, 3) if total else 0.0,
+        "deconfliction_violations_sampled": viol,
+    }
+
+
 def full_report() -> dict:
     return {
         "coverage_gap": coverage_gap(), "dwell": dwell(), "calibration": calibration(),
         "mitre_coverage": mitre_coverage(), "roe_compliance": roe_compliance(),
         "reattack_efficiency": reattack_efficiency(),
+        "mea_reliability": mea_reliability(), "mission_impact": mission_impact(),
+        "moe_indicators": moe_indicators(), "assessment_quality": assessment_quality(),
     }

@@ -5,11 +5,13 @@
 (4~6순위: MITRE 커버리지·RoE 준수·재타격 효율 — 후속.)
 """
 from .metrics import (
-    calibration, coverage_gap, dwell, full_report,
-    mitre_coverage, reattack_efficiency, roe_compliance,
+    assessment_quality, calibration, coverage_gap, dwell, full_report,
+    mea_reliability, mission_impact, mitre_coverage, moe_indicators,
+    reattack_efficiency, roe_compliance,
 )
 
 __all__ = [
-    "calibration", "coverage_gap", "dwell", "full_report",
-    "mitre_coverage", "reattack_efficiency", "roe_compliance",
+    "assessment_quality", "calibration", "coverage_gap", "dwell", "full_report",
+    "mea_reliability", "mission_impact", "mitre_coverage", "moe_indicators",
+    "reattack_efficiency", "roe_compliance",
 ]

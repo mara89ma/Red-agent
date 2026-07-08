@@ -13,13 +13,14 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from redteam_core.kpi import (                                     # noqa: E402
-    calibration, coverage_gap, dwell,
-    mitre_coverage, reattack_efficiency, roe_compliance,
+    assessment_quality, calibration, coverage_gap, dwell,
+    mea_reliability, mission_impact, mitre_coverage, moe_indicators,
+    reattack_efficiency, roe_compliance,
 )
 
 
 def main() -> None:
-    print("=== fried-pollack-ai · 레드팀 KPI 대시보드 (1~6순위) ===\n")
+    print("=== fried-pollack-ai · 레드팀 KPI 대시보드 (1~10순위) ===\n")
 
     cg = coverage_gap()
     print("① 방어 공백 지표 (Blue Coverage Gap)")
@@ -54,8 +55,27 @@ def main() -> None:
     print(f"   달성 {re_['achieved_objectives']}/{re_['total_objectives']} 목표 · "
           f"평균 시도 {re_['avg_attempts_to_achieve']}회/달성")
 
-    print("\n요약: 사각지대(EW·AI)·완전 은밀 캠페인(C9)이 방어 최우선. "
-          "RoE는 EW/무장을 교리대로 차단(JCEOI·ConOps). 임계보정은 watchlist 갱신 반영.")
+    print("\n── DoD 교리 보강 KPI (7~10) ──")
+    mea = mea_reliability()
+    print(f"⑦ MEA(TTP 신뢰성): 전체 {mea['mea_overall']*100:.0f}% · "
+          f"jam {mea['per_ttp']['jam']*100:.0f}% / spoof {mea['per_ttp']['gnss_spoof']*100:.0f}%")
+
+    mi = mission_impact()
+    print(f"⑧ 임무영향/MRT-C: 임무저하지수 {mi['mission_degradation_index']*100:.0f}% · "
+          f"영향 임무효과 {len(mi['affected_mrt_c'])}종")
+
+    moe = moe_indicators()
+    print("⑨ MOE 지표계층:")
+    print(f"   MOE1 효과: 임무저하 {moe['MOE1_effect_achievement']['mission_degradation_index']}")
+    print(f"   MOE2 생존: 사각 {moe['MOE2_survivability']['blind_spot_ratio']} · "
+          f"평균 탐지단계 {moe['MOE2_survivability']['avg_steps_to_detection']}")
+
+    aq = assessment_quality()
+    print(f"⑩ BDA신뢰 {aq['bda_confidence']} · OPSEC노출 {aq['opsec_exposure_ratio']*100:.0f}% · "
+          f"데컨플릭션 위반(샘플) {aq['deconfliction_violations_sampled']}")
+
+    print("\n요약(교리 정합): MOE/MOP·MEA·BDA·임무영향(MRT-C)·CDE/RoE·데컨플릭션까지 "
+          "JP 3-60/3-12/5-0 평가 지표를 대부분 커버. 시간지표(MTTD)만 라이브(본선).")
 
 
 def _f(x) -> str:
