@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""아카이브 경로순회(Zip Slip) 데모 — 신규 S39~S41 + §T 탐지.
+"""아카이브 경로순회(Zip Slip) 데모 — 신규 S53~S55 + §T 탐지.
 
     python benchmarks/archive_slip_eval.py
 
@@ -29,15 +29,15 @@ def _benign_zip():
 
 
 CASES = [
-    ("S39 Zip Slip(../)", craft_zip_slip()),
-    ("S41 절대경로", craft_zip_absolute()),
-    ("S40 tar symlink 탈출", craft_tar_symlink()),
-    ("S39 tar ../(안전param)", craft_tar_slip()),
+    ("S53 Zip Slip(../)", craft_zip_slip()),
+    ("S55 절대경로", craft_zip_absolute()),
+    ("S54 tar symlink 탈출", craft_tar_symlink()),
+    ("S53 tar ../(안전param)", craft_tar_slip()),
 ]
 
 
 def main():
-    print("=== fried-pollack-ai · 아카이브 경로순회(S39~S41) + §T 탐지 ===\n")
+    print("=== fried-pollack-ai · 아카이브 경로순회(S53~S55) + §T 탐지 ===\n")
     for label, p in CASES:
         r = detonate_archive(p.data, p.fmt)
         mark = {"malicious": "🔴", "benign": "🟢"}[r.verdict]
