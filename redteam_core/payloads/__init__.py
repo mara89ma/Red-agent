@@ -19,6 +19,9 @@ from .run import (
     run_model_extraction, run_prompt_injection,
 )
 from .adaptive import AdaptivePayload, AdaptivePayloadGenerator, SituationContext
+from .archive import (
+    ArchivePayload, craft_tar_slip, craft_tar_symlink, craft_zip_absolute, craft_zip_slip,
+)
 
 __all__ = [
     "CONVERTERS", "generate_prompt_injections",

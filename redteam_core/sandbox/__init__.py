@@ -10,6 +10,8 @@ allowlist 로만 허용, 나머지 차단·기록. FS 는 ephemeral tempdir + ro
 """
 from .detonate import DetonationReport, DetonationSandbox, SandboxPolicy
 from .guard import ai_spec, caldera_spec, default_policy, guard, guarded
+from .archive import ArchiveReport, detonate_archive
 
 __all__ = ["DetonationReport", "DetonationSandbox", "SandboxPolicy",
-           "ai_spec", "caldera_spec", "default_policy", "guard", "guarded"]
+           "ai_spec", "caldera_spec", "default_policy", "guard", "guarded",
+           "ArchiveReport", "detonate_archive"]

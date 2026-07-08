@@ -18,7 +18,8 @@ def _clear_env(monkeypatch):
 def test_all_fallback_without_env():
     st = integration_status()
     assert all(v["mode"] == "fallback" for v in st.values())
-    assert set(st) == {"ai_attack", "caldera", "sitl", "threat_intel", "apt_emulation"}
+    assert set(st) == {"ai_attack", "caldera", "sitl", "threat_intel", "apt_emulation",
+                       "archive_tools"}
 
 
 def test_ai_attack_fallback_is_blindspot():
