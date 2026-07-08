@@ -29,7 +29,9 @@ def status() -> dict:
 def run_operation(chain_id: str) -> dict:
     """chain_id: C1~C10. 실연동 시 Caldera operation, 아니면 §M 내부 실행."""
     if available():
-        return _run_real(chain_id)
+        # §T 샌드박스 게이트: Caldera 서버가 스코프 내일 때만 실 operation(fail-closed).
+        from ..sandbox import caldera_spec, guarded
+        return guarded(caldera_spec(chain_id, _url()), lambda: _run_real(chain_id))
     from ..campaigns import run_chain
     r = run_chain(chain_id)
     return {"mode": "fallback", "chain": chain_id, "verdict": r.verdict,

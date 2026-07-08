@@ -41,7 +41,10 @@ def run_ai_attack(technique: str, payload: str = "") -> dict:
     """
     mitre = {"prompt_injection": "AML.T0051", "model_extraction": "ATLAS(모델추출)"}
     if available():
-        return _run_real(technique, payload, mitre.get(technique, ""))
+        # §T 샌드박스 게이트: 표적이 스코프 내·격리 봉인일 때만 실 실행(fail-closed).
+        from ..sandbox import ai_spec, guarded
+        return guarded(ai_spec(technique, _target()),
+                       lambda: _run_real(technique, payload, mitre.get(technique, "")))
     # 폴백: blue 미매핑(사각지대) — assess 로 일관 판정.
     from ..assessment.bda import assess_action
     action = "ml_prompt_inject" if technique == "prompt_injection" else "ml_extract_secret"
