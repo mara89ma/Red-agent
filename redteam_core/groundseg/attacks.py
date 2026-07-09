@@ -90,13 +90,18 @@ def build_artifact(scenario_id: str) -> str:
 def run_ground(scenario_id: str, dry: bool = True) -> GroundResult:
     m = GROUND_SCENARIOS[scenario_id]
     art = build_artifact(scenario_id)
-    sent = False
+    sent, detail = False, ""
     if not dry:
+        # 실 공격: §T 샌드박스로 감싸 execute_real 수행(표적 도달 시 실제 파일/소켓/HTTP).
         from ..sandbox import guarded
-        r = guarded({"name": f"ground:{scenario_id}", "network": []}, lambda: {"sent": True})
-        sent = "sent" in r
+        from .executor import execute_real
+        r = guarded({"name": f"ground:{scenario_id}", "network": []},
+                    lambda: execute_real(scenario_id))
+        sent = bool(r.get("sent"))
+        detail = r.get("reason") or r.get("path") or str({k: v for k, v in r.items()
+                 if k not in ("sent",)})[:60]
     return GroundResult(scenario_id, m["surface"], art, sent,
-                        "UAV Sentinel 미감시 계층=사각지대. 실 실행=표적 env+§T 샌드박스")
+                        detail or "UAV Sentinel 미감시=사각지대. 실 실행=표적 env+§T 샌드박스")
 
 
 def surfaces() -> dict:
