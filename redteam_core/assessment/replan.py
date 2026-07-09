@@ -65,6 +65,24 @@ OBJECTIVES = {
     "telemetry_poison": ["telemetry_poison"],        # S97: 텔레메트리 수집 오염
     "video_stream_hijack": ["video_stream_hijack"],  # S98: 영상스트림 하이재킹
     "c4i_inject": ["c4i_inject"],                    # S99: C4I 메시지 주입
+    # ── 빈 번호 채움(extended, S22·S28·S63~S65·S74~S85) — 전부 사각지대 ──
+    "param_mass_reset": ["param_mass_reset"],            # S22
+    "video_downlink_inject": ["video_downlink_inject"],  # S28
+    "passive_telemetry_sniff": ["passive_telemetry_sniff"],  # S63
+    "passive_asset_enum": ["passive_asset_enum"],        # S64
+    "bms_power_spoof": ["bms_power_spoof"],              # S65
+    "gimbal_hijack": ["gimbal_hijack"],                  # S74
+    "registry_image_tamper": ["registry_image_tamper"],  # S75
+    "cicd_pipeline_compromise": ["cicd_pipeline_compromise"],  # S76
+    "secrets_vault_theft": ["secrets_vault_theft"],      # S77
+    "mtls_cert_forge": ["mtls_cert_forge"],              # S78
+    "dependency_confusion": ["dependency_confusion"],    # S79
+    "iac_tamper": ["iac_tamper"],                        # S80
+    "artifact_signing_bypass": ["artifact_signing_bypass"],  # S81
+    "build_provenance_attack": ["build_provenance_attack"],  # S82
+    "dds_discovery_flood": ["dds_discovery_flood"],      # S83
+    "mqtt_bus_poison": ["mqtt_bus_poison"],              # S84
+    "geofence_tamper": ["geofence_tamper"],              # S85
 }
 
 # 연속 액션의 '효과 바닥' — 이 미만이면 효과 미달. blue 임계와의 관계가 회피창을 정함.

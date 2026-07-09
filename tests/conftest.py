@@ -22,6 +22,7 @@ _FEATURE = {
     "test_advanced": "고급 드론 공격 (RC·DShot·anti-forensics)",
     "test_simtest": "다중센서 폴트인젝션 (AutoSim)",
     "test_exfil": "데이터 유출 시나리오",
+    "test_extended": "빈 번호 채움 시나리오 (공급망·기체·미들웨어)",
     "test_campaigns": "캠페인 체인 실행",
     "test_kpi": "레드팀 KPI", "test_kpi2": "레드팀 KPI",
     "test_benchmark": "능력 벤치마크(xbow식)",
