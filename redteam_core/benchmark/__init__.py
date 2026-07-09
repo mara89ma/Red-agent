@@ -12,7 +12,10 @@ from .harness import Challenge, Scoreboard, run_challenge, run_suite
 from .suite import UAV_BENCHMARKS
 from .external import EXTERNAL_BENCHMARKS, external_status
 from .scorecard import format_scorecard, kpi_scorecard
+from .targets import TARGETS
+from .trend import format_trend, project_rounds, trend_summary
 
 __all__ = ["Challenge", "Scoreboard", "run_challenge", "run_suite",
            "UAV_BENCHMARKS", "EXTERNAL_BENCHMARKS", "external_status",
-           "kpi_scorecard", "format_scorecard"]
+           "kpi_scorecard", "format_scorecard", "TARGETS",
+           "project_rounds", "trend_summary", "format_trend"]

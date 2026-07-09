@@ -12,6 +12,7 @@ from ..kpi import (
     assessment_quality, coverage_gap, dwell, mea_reliability, mission_impact,
     mitre_coverage, moe_indicators, reattack_efficiency, roe_compliance,
 )
+from .targets import TARGETS
 
 
 @dataclass
@@ -21,6 +22,7 @@ class Metric:
     target: float
     higher_better: bool
     rating: str
+    source: str = ""
 
 
 def _rate(v: float, target: float, higher_better: bool = True) -> str:
@@ -29,9 +31,12 @@ def _rate(v: float, target: float, higher_better: bool = True) -> str:
     return "우수" if v <= target else "양호" if v <= 1.3 * target else "주의"
 
 
-def _m(kpi, value, target, higher_better=True) -> Metric:
-    return Metric(kpi, round(float(value), 3), target, higher_better,
-                  _rate(float(value), target, higher_better))
+def _m(kpi, value, target_key) -> Metric:
+    """근거화 목표(targets.TARGETS)로 채점 — target·방향·출처를 정박."""
+    t = TARGETS[target_key]
+    v = round(float(value), 3)
+    return Metric(kpi, v, t["value"], t["higher_better"],
+                  _rate(v, t["value"], t["higher_better"]), t["source"])
 
 
 def kpi_scorecard() -> dict:
@@ -66,31 +71,31 @@ def kpi_scorecard() -> dict:
 
     categories = [
         {"key": "effectiveness", "title": "효과성 (MOE)", "metrics": [
-            _m("Attack Success Rate", asr, 0.80),
-            _m("Mission Degradation (MOE1)", md, 0.70),
-            _m("MEA 신뢰도", mea, 0.85),
+            _m("Attack Success Rate", asr, "attack_success_rate"),
+            _m("Mission Degradation (MOE1)", md, "mission_degradation"),
+            _m("MEA 신뢰도", mea, "mea_reliability"),
         ]},
         {"key": "stealth", "title": "은밀성·회피 (Evasion)", "metrics": [
-            _m("실행 은밀 관통율", stealth_rate, 0.80),
-            _m("방어 사각 비율(적 기회)", blind, 0.30),
-            _m("D3FEND 미대응 비율", d3f, 0.30),
+            _m("실행 은밀 관통율", stealth_rate, "stealth_rate"),
+            _m("방어 사각 비율(적 기회)", blind, "blind_spot_ratio"),
+            _m("D3FEND 미대응 비율", d3f, "d3fend_blind_ratio"),
         ]},
         {"key": "mttd_dwell", "title": "탐지시간·체류 (MTTD/Dwell)", "metrics": [
-            _m("평균 체류(탐지까지 단계)", avg_steps, 2.0),
-            _m("미탐지 관통율(dwell=∞)", undetected_rate, 0.25),
+            _m("평균 체류(탐지까지 단계)", avg_steps, "mttd_steps"),
+            _m("미탐지 관통율(dwell=∞)", undetected_rate, "undetected_rate"),
         ]},
         {"key": "reattack", "title": "재타격 효율 (OODA)", "metrics": [
-            _m("목표당 평균 시도수", avg_attempts, 2.5, higher_better=False),
+            _m("목표당 평균 시도수", avg_attempts, "reattack_attempts"),
         ]},
         {"key": "coverage", "title": "커버리지 (ATT&CK)", "metrics": [
-            _m("MITRE 기법 수", mc["total_techniques"], 20),
+            _m("MITRE 기법 수", mc["total_techniques"], "mitre_techniques"),
         ]},
         {"key": "compliance", "title": "RoE·OPSEC 통제", "metrics": [
-            _m("비가역 차단 건수(BLOCKED)", blocked, 1),
-            _m("OPSEC 노출 비율", opsec, 0.35, higher_better=False),
+            _m("비가역 차단 건수(BLOCKED)", blocked, "roe_blocked"),
+            _m("OPSEC 노출 비율", opsec, "opsec_exposure"),
         ]},
         {"key": "assessment", "title": "평가 신뢰 (BDA)", "metrics": [
-            _m("BDA 고신뢰 비율", hi_conf, 0.40),
+            _m("BDA 고신뢰 비율", hi_conf, "bda_high_conf"),
         ]},
     ]
 
@@ -121,4 +126,11 @@ def format_scorecard(sc: dict) -> str:
                f"(우수 {sc['counts']['우수']}·양호 {sc['counts']['양호']}·주의 {sc['counts']['주의']})")
     out.append("\n헤드라인:")
     out += [f"  • {h}" for h in sc["headline"]]
+    out.append("\n목표 근거(출처):")
+    seen = set()
+    for c in sc["categories"]:
+        for m in c["metrics"]:
+            if m.source and m.source not in seen:
+                seen.add(m.source)
+                out.append(f"  - {m.source}")
     return "\n".join(out)
