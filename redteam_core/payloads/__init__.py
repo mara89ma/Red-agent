@@ -23,6 +23,7 @@ from .archive import (
     ArchivePayload, craft_tar_slip, craft_tar_symlink, craft_zip_absolute, craft_zip_slip,
 )
 from .advanced import ADVANCED_SCENARIOS
+from .collection import COLLECTION_SCENARIOS
 
 __all__ = [
     "CONVERTERS", "generate_prompt_injections",

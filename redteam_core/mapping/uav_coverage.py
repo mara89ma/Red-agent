@@ -218,21 +218,22 @@ RED_COVER: Dict[str, str] = {
     "T1011": "S61 유출-SATCOM 대체매체(§N advanced)",
     "T1567": "S61 유출-REST 웹서비스(§N advanced)",
     "T0882": "S62 작전정보 탈취(§N advanced)",
+    # 수동 수집·심화 정찰 실 구현(S63~S64) — red 수행 O, blue 로그 없음(사각).
+    "T1125": "S63 영상 수동 도청(§N collection)",
+    "T1119": "S63 자동 수집(§N collection)",
+    "T0845": "S63 임무/파라미터 추출(§N collection)",
+    "T1113": "S63 화면 캡처(§N collection)",
+    "T1005": "S63 로컬 파일 수집(§N collection)",
+    "T1056": "S63 키입력 가로채기(§N collection)",
+    "T1590": "S64 네트워크 구조 정찰(§N collection)",
+    "T1596": "S64 CVE DB 검색(§Q cve_intel)",
 }
 
-# 미커버 기법 분류: 'excluded'=의도적 범위 밖 / 'reinforce'=보강 후보.
+# 미커버 기법 분류: 'excluded'=진짜 불가능(공격자 자기 인프라만).
+# SOFT 제외(수동수집·정찰)는 S63~S64 로 실 구현해 커버로 전환 → 제외에서 제거.
 GAP_SCOPE: Dict[str, str] = {
-    # 공격자 자기 인프라 — 네트워크 격리로 대응(설계상 범위 밖).
+    # 공격자가 자기 컴퓨터에서 도구 개발·획득·스테이징 — sim 밖, red 불가(반박 불가).
     "T1587": "excluded", "T1588": "excluded", "T1608": "excluded",
-    "T1590": "excluded", "T1596": "excluded",
-    # 수동 수집(로그 없음·능동 공격 아님) — red 에이전트 능동 시나리오 대상 아님.
-    "T1125": "excluded", "T1119": "excluded", "T0845": "excluded",
-    "T1113": "excluded", "T1005": "excluded", "T1056": "excluded",
-    # 보강 후보 — 에이전트가 실증 가능(우선순위: C2 은닉·파괴·유출 변형).
-    "T1572": "reinforce", "T1573": "reinforce", "T1001": "reinforce", "T1132": "reinforce",
-    "T1556": "reinforce", "T1014": "reinforce", "T0809": "reinforce", "T0800": "reinforce",
-    "T0851": "reinforce", "T1011": "reinforce", "T1567": "reinforce", "T0882": "reinforce",
-    "T1485": "reinforce",
 }
 
 
@@ -304,9 +305,12 @@ def gaps_by_scope() -> Dict[str, List[Tuple[str, str, str]]]:
 
 
 def effective_summary() -> dict:
-    """의도적 범위 제외(excluded)를 분모에서 뺀 '유효 커버리지'."""
+    """3단 커버리지: 전체 / 엄격(진짜불가 3개만 제외) — 둘 다 정직한 분모."""
     s = summary()
-    excluded = sum(1 for _, tid, _, _ in UAV_MATRIX if GAP_SCOPE.get(tid) == "excluded")
+    # 커버되지 않았고 진짜 불가능한 것만 분모에서 제외(커버된 건 절대 빼지 않음).
+    excluded = sum(1 for _, tid, _, _ in UAV_MATRIX
+                   if GAP_SCOPE.get(tid) == "excluded" and tid not in RED_COVER)
     in_scope = s["total_techniques"] - excluded
     return {**s, "excluded": excluded, "in_scope": in_scope,
+            "total_pct": s["coverage_pct"],
             "effective_pct": round(100 * s["covered"] / in_scope, 1) if in_scope else 0.0}

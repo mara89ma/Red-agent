@@ -39,5 +39,22 @@ def test_advanced_scenarios_detected():
 
 def test_effective_coverage_now_100():
     e = effective_summary()
-    assert e["effective_pct"] == 100.0                  # 유효 커버리지 100%
+    assert e["effective_pct"] == 100.0                  # 진짜불가 3개만 제외 → 100%
     assert gaps_by_scope()["reinforce"] == []           # 보강후보 소진
+
+
+def test_conservative_total_coverage_over_95():
+    # 보수적: 전체 매트릭스(범위 재정의 없음) 기준 ≥95%.
+    e = effective_summary()
+    assert e["total_pct"] >= 95.0                       # 97.1%
+    assert e["excluded"] == 3                           # 진짜 불가(공격자 자기 인프라)만
+
+
+def test_collection_scenarios_real_and_blind():
+    from redteam_core.payloads.collection import COLLECTION_SCENARIOS
+    assert len(COLLECTION_SCENARIOS) == 8
+    for tid, fn in COLLECTION_SCENARIOS.items():
+        p = fn()
+        r = analyze(p)
+        assert p.data and p.technique                    # 실 아티팩트
+        assert r.blind_spot is True                      # 정직: blue 로그 없음(사각)

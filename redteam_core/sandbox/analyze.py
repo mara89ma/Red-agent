@@ -108,10 +108,26 @@ def _theft(p):
     return _keyword(p, ("EO/IR", "SAR", "copy", "targets"), "작전정보(영상·표적) 탈취")
 
 
+def _collection(p):
+    # 수동 수집 — red 는 수행하나 blue 전용 로그 없음 → 정직하게 blind_spot.
+    r = AnalyzeReport(p.scenario, p.kind)
+    r.indicators.append(f"{p.technique} 수동 수집 — blue 로그 없음(사각지대)")
+    r.verdict = "suspicious"; r.blind_spot = True
+    return r
+
+
+def _recon(p):
+    r = AnalyzeReport(p.scenario, p.kind)
+    r.indicators.append(f"{p.technique} 정찰 — 예방통제(격리) 대상, blue 탐지 제한(사각)")
+    r.verdict = "suspicious"; r.blind_spot = True
+    return r
+
+
 _DISPATCH = {"upload": _upload, "escape": _escape,
              "suid": _suid, "cron": _cron, "idor": _idor,
              "destruction": _destruction, "rootkit": _rootkit, "fw_mode": _fw_mode,
-             "auth_modify": _auth_modify, "exfil_alt": _exfil_alt, "theft": _theft}
+             "auth_modify": _auth_modify, "exfil_alt": _exfil_alt, "theft": _theft,
+             "collection": _collection, "recon": _recon}
 
 
 def analyze(payload) -> AnalyzeReport:
