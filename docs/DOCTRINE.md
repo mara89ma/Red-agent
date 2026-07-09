@@ -60,6 +60,7 @@
 | `dronesploit/` | WiFi(deauth·evil twin·재밍·기본자격 S39~S42)+COTS 표적+모듈+CVE | 802.11 |
 | `advanced/` | RC 링크(DSMX/FrSky/ELRS)·DShot 모터·anti-forensics S43~S47+기법카탈로그 | Awesome-Drone |
 | `simtest/` | 다중센서 폴트인젝션 S56~S59(EKF 우회)+환경 증폭+인시던트KB+비행로그 오라클 | AutoSim |
+| `groundseg/` | 지상 세그먼트 소프트웨어 공격 S86~S99(GCS 앱·ROS·데이터링크·클라우드). execute_real 실 실행 | 지상/클라우드 공격면 |
 
 #### 킬체인·실행 (Kill Chain / Execution)
 | 모듈 | 기능 | 교리 근거 |
@@ -78,6 +79,7 @@
 #### 평가·KPI·벤치마크 (Assessment / Metrics)
 | 모듈 | 기능 | 교리 근거 |
 |---|---|---|
+| `audit/` | 검증 강도 감사 — real_exec(실행검증)/grounded_model/self_model 분류(정직성 계층) | 자기기만 방지 |
 | `kpi/` | KPI 10종(방어공백·dwell·임계보정·MITRE·RoE·재타격·MEA·임무영향·MOE·BDA) | JP 3-60/3-12/5-0 |
 | `benchmark/` | xbow식 챌린지+탐지회피 채점(달성 AND 미탐지)+KPI 스코어카드(근거화·라운드 추세)+외부 어댑터 | xbow·MITRE Eval·M-Trends |
 
@@ -91,6 +93,7 @@
 #### 조직·기만·지속 (Org / Deception / Sustainment)
 | 모듈 | 기능 | 교리 근거 |
 |---|---|---|
+| `mission_command/` | 임무형 지휘 — 사람 1회 미션 프로필→오케스트레이터 자율 지휘(의도 분해·RoE 상한 자율보류) | Auftragstaktik·Mission Command |
 | `orchestration/` | CMT 직무 협업 MC→TDNA→ION→BDA (USCYBERCOM CMF) | 사이버작전 조직 |
 | `tempo/` | 공격 템포: low-and-slow(∞MTTD) vs smash(즉효·즉탐지) 시간지표 갭 | OODA 템포 |
 | `deception/` | 미끼로 SOC 분석주의 포화 → 진짜 공격 은폐 | JP 3-13.4 MILDEC |
@@ -101,6 +104,16 @@
 |---|---|---|
 | `integrations/` | 외부 도구 opt-in seam: AI공격·Caldera·SITL·TI·APT 에뮬레이션·Metasploit·CVE | 실 연동(env) |
 | `toolsearch/` | 공격 막힐 때 GitHub 툴 자동검색(라이브 GITHUB_TOKEN/큐레이션 시드), 읽기전용 | 능력갭→도구발견 |
+
+#### 결정평면 (Decision-Plane, 교리 5종)
+> 개별 센서·판정이 아니라 '융합·재조합·Orient·기록·지휘' 결정평면을 노림.
+
+| 모듈 | 기능 | 교리 근거 |
+|---|---|---|
+| `jadc2/` | 융합 레이어 공격 — 다중센서 정합성(개별미탐+거짓상관 FP/진짜를 노이즈 FN)+메시 저하 테스트 | JADC2 |
+| `mosaic/` | 재조합 로직 공격 + judge **실 introspection** 독립성 검증(common-mode) | Mosaic Warfare/Kill Web |
+| `ooda/` | Orient-phase denial(S29 재프레임)+red↔blue OODA 속도경쟁 스코어보드 | OODA(Boyd) |
+| `information/` | 리포팅/증거체인 공격 S100~S102(SOCReport·OSCAL·PR 위조). execute_real 실 실행 | 정보(7번째 합동기능, JP 3-0) |
 
 ---
 

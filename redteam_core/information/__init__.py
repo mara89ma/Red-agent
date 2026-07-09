@@ -6,5 +6,6 @@ RuleUpdate PR 본문을 조작해 '거짓 정보산출물'을 만든다.
 = '기록/진실 그 자체'를 노리는 새 공격 축(S1~S99 어디에도 없던 카테고리, S100~S102).
 """
 from .reporting import REPORT_TARGETS, attack_reporting_chain
+from .executor import execute_real
 
-__all__ = ["REPORT_TARGETS", "attack_reporting_chain"]
+__all__ = ["REPORT_TARGETS", "attack_reporting_chain", "execute_real"]

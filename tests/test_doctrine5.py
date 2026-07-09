@@ -4,7 +4,9 @@ from __future__ import annotations
 from redteam_core.information import attack_reporting_chain
 from redteam_core.jadc2 import mesh_degradation_test, multi_sensor_consistency_attack
 from redteam_core.mission_command import MissionProfile, run_mission_command
-from redteam_core.mosaic import attack_recombination_logic, verify_judge_independence
+from redteam_core.mosaic import (
+    attack_recombination_logic, introspect_judges, verify_judge_independence,
+)
 from redteam_core.ooda import ooda_race, orient_phase_denial
 
 
@@ -28,14 +30,22 @@ def test_jadc2_mesh_graceful_vs_catastrophic():
 
 
 # ── Mosaic 재조합/독립성 ──
-def test_mosaic_judge_common_mode():
+def test_mosaic_real_introspection():
+    # 하드코딩 아니라 실제 ensemble.py 검사: signal=veto, 조언 judge 존재.
+    j = introspect_judges()
+    assert j["signal"]["veto"] is True and j["experience"]["veto"] is False
+    assert "signal_verified" in j["signal"]["ctx_fields"]
+
+
+def test_mosaic_advisory_judges_are_independent():
+    # 실 소스 검증: 조언 judge 가 서로 다른 1차 소스 → common-mode 아님(정직).
     r = verify_judge_independence()
-    assert r.common_mode is True and "rag_kb" in r.shared_sources
+    assert r.common_mode is False and r.veto_judges == ["signal"]
 
 
-def test_mosaic_recombination_saved_by_veto():
-    r = attack_recombination_logic("rag_kb")
-    assert r.flipped is True and r.saved_by_veto is True       # 조언 붕괴 but veto 보존
+def test_mosaic_evidence_poison_contained_by_veto():
+    r = attack_recombination_logic("evidence")
+    assert "llm" in r.affected_judges and r.veto_preserves is True  # veto 미의존→보존
 
 
 # ── OODA ──

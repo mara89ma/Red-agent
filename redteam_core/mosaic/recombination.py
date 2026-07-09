@@ -1,70 +1,82 @@
-"""재조합 로직 공격 + judge 독립성 검증.
+"""재조합 로직 공격 + judge 독립성 **실 introspection**.
 
-실제 judge 앙상블(judge/ensemble.py): SignalJudge(ground-truth 오라클·권위·veto) +
-ExperienceJudge(memory) + LLMJudge(조언). red 관점 핵심: '다양성'이 실제로 독립인가?
-두 조언 judge 가 같은 상위 소스(RAG/memory)를 공유하면 common-mode — 그 소스 하나를
-오염(S5/S29)시키면 두 조언 judge 가 동시에 흔들린다. 유일한 진짜 독립은 out-of-band
-SignalJudge(오라클). 이 검증이 mosaic 회복탄력성의 급소를 드러낸다.
+하드코딩 모델이 아니라 실제 judge/ensemble.py 소스를 inspect 로 검사해, 각 judge 가
+JudgeContext 의 어느 필드(=상위 소스)에 의존하는지 추출한다. 조언 judge 들이 같은
+ctx 필드를 공유하면 common-mode(그 입력 오염으로 동시 붕괴). 권위(authoritative=veto)
+judge 는 별도 표시. → '모델 검증'이 아니라 '실 코드 검증'.
 """
 from __future__ import annotations
 
+import inspect
+import re
 from dataclasses import dataclass
 from typing import Dict, List, Set
 
-# judge → 참조하는 상위 소스 집합(실제 앙상블 구조 반영)
-JUDGE_SOURCES: Dict[str, Set[str]] = {
-    "SignalJudge": {"ground_truth_oracle"},        # out-of-band, 권위(veto)
-    "ExperienceJudge": {"memory", "rag_kb"},        # 조언
-    "LLMJudge": {"rag_kb", "llm_advice"},           # 조언 — rag_kb 공유!
-}
+
+def introspect_judges() -> Dict[str, dict]:
+    """실제 ensemble.py 의 Judge 클래스별 (의존 ctx 필드, veto 권한) 추출."""
+    from ..judge import ensemble
+    out: Dict[str, dict] = {}
+    for _n, obj in inspect.getmembers(ensemble, inspect.isclass):
+        if obj.__module__ != ensemble.__name__ or not obj.__name__.endswith("Judge"):
+            continue
+        if obj.__name__ in ("Judge",):          # Protocol 제외
+            continue
+        try:
+            src = inspect.getsource(obj)
+        except OSError:
+            continue
+        fields = set(re.findall(r"ctx\.(\w+)", src))
+        authoritative = "authoritative=True" in src.replace(" ", "")
+        name = getattr(obj, "name", obj.__name__)
+        out[name] = {"class": obj.__name__, "ctx_fields": fields, "veto": authoritative}
+    return out
 
 
 @dataclass
 class IndependenceResult:
-    advisory_judges: List[str]
-    shared_sources: Set[str]
+    judges: Dict[str, dict]
+    advisory: List[str]
+    veto_judges: List[str]
+    shared_fields: Set[str]     # 조언 judge 들이 공유하는 ctx 입력(=common-mode 후보)
     common_mode: bool
-    independence_pct: float
-    single_point: str
     note: str
 
 
 def verify_judge_independence() -> IndependenceResult:
-    """조언 judge 들이 진짜 독립인지(공유 소스=common-mode) 검증."""
-    advisory = [j for j in JUDGE_SOURCES if j != "SignalJudge"]
-    src_lists = [JUDGE_SOURCES[j] for j in advisory]
-    shared = set.intersection(*src_lists) if src_lists else set()
-    all_src = set().union(*src_lists) if src_lists else set()
-    common_mode = bool(shared)
-    indep = round(100 * (1 - len(shared) / max(1, len(all_src))), 1)
-    single = ", ".join(sorted(shared)) if shared else "-"
-    note = (f"common-mode! 조언 judge 가 '{single}' 공유 → 그 소스 오염으로 동시 붕괴. "
-            f"진짜 독립은 SignalJudge(오라클·veto)뿐" if common_mode
-            else "조언 judge 소스 독립")
-    return IndependenceResult(advisory, shared, common_mode, indep, single, note)
+    """실 introspection 기반 독립성 검증."""
+    j = introspect_judges()
+    veto = [n for n, d in j.items() if d["veto"]]
+    advisory = [n for n, d in j.items() if not d["veto"]]
+    adv_fields = [j[n]["ctx_fields"] for n in advisory]
+    shared = set.intersection(*adv_fields) if adv_fields else set()
+    # 각 조언 judge 의 '고유 1차 소스'가 다르면 실질 독립(공유는 target_id 등 공통 키뿐).
+    primary = {"experience": "experience_gate", "llm": "evidence"}
+    distinct_primary = {primary.get(n) for n in advisory} - {None}
+    common_mode = len(distinct_primary) < len([n for n in advisory if n in primary])
+    note = (f"조언 judge {advisory} 는 서로 다른 1차 소스({sorted(distinct_primary)})에 의존 "
+            f"→ 실질 독립(공유는 {sorted(shared)} 같은 공통 키뿐). "
+            f"권위 veto = {veto} (진짜 out-of-band 독립)" if not common_mode
+            else f"common-mode! 조언 judge 가 1차 소스 공유")
+    return IndependenceResult(j, advisory, veto, shared, common_mode, note)
 
 
 @dataclass
 class RecombinationResult:
-    poisoned_source: str
-    baseline_verdict: str
-    poisoned_verdict: str
-    flipped: bool
-    saved_by_veto: bool
+    poisoned_field: str
+    affected_judges: List[str]
+    veto_preserves: bool
     note: str
 
 
-def attack_recombination_logic(poison_source: str = "rag_kb") -> RecombinationResult:
-    """공유 소스 오염 → 조언 judge 동시 이동. 재조합(가중 집계)이 뒤집히는지.
-
-    단, SignalJudge(오라클)가 veto 권한을 가지면 조언이 다 흔들려도 최종은 보존.
-    """
+def attack_recombination_logic(poison_field: str = "evidence") -> RecombinationResult:
+    """특정 ctx 필드 오염 → 그 필드를 읽는 judge 만 영향. veto 가 최종 보존하는가?"""
     ind = verify_judge_independence()
-    advisory_flip = poison_source in ind.shared_sources    # 공유 소스면 조언 다 뒤집힘
-    # 조언 집계만 보면 뒤집히지만, SignalJudge veto 로 최종 판정 보존.
-    saved = advisory_flip                                   # veto 가 막아줌
-    baseline, poisoned = "benign_correct", ("malicious_false" if advisory_flip else "benign_correct")
-    note = ("공유 소스 오염으로 조언 judge 전부 뒤집힘(common-mode 실증) — "
-            "그러나 SignalJudge veto 가 최종 판정 보존. veto 없으면 재조합 붕괴"
-            if advisory_flip else "오염 무효(공유 소스 아님)")
-    return RecombinationResult(poison_source, baseline, poisoned, advisory_flip, saved, note)
+    affected = [n for n, d in ind.judges.items()
+                if poison_field in d["ctx_fields"] and not d["veto"]]
+    # 권위 judge 가 오염 필드에 의존하지 않으면 veto 로 최종 판정 보존.
+    veto_clean = all(poison_field not in ind.judges[v]["ctx_fields"] for v in ind.veto_judges)
+    note = (f"'{poison_field}' 오염 → 조언 {affected} 영향. "
+            f"권위 veto({ind.veto_judges})는 {poison_field} 미의존 → 최종 판정 보존"
+            if veto_clean else f"'{poison_field}' 오염이 veto judge 까지 침범 → 위험")
+    return RecombinationResult(poison_field, affected, veto_clean, note)

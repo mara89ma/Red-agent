@@ -7,7 +7,7 @@
     붕괴. 이걸 실제로 검증한다.
 """
 from .recombination import (
-    JUDGE_SOURCES, attack_recombination_logic, verify_judge_independence,
+    attack_recombination_logic, introspect_judges, verify_judge_independence,
 )
 
-__all__ = ["JUDGE_SOURCES", "verify_judge_independence", "attack_recombination_logic"]
+__all__ = ["introspect_judges", "verify_judge_independence", "attack_recombination_logic"]

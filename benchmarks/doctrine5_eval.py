@@ -27,11 +27,12 @@ def main() -> None:
     m = mesh_degradation_test(5, 4)
     print(f"   메시 저하(5링크 중 4절단): {m.verdict}")
 
-    print("\n② Mosaic 재조합 로직 + judge 독립성")
+    print("\n② Mosaic 재조합 로직 + judge 독립성(실 introspection)")
     ind = verify_judge_independence()
-    print(f"   judge 독립성 {ind.independence_pct}% — {ind.note}")
-    rc = attack_recombination_logic("rag_kb")
-    print(f"   재조합 공격: 조언붕괴={rc.flipped} · veto보존={rc.saved_by_veto}")
+    print(f"   실 judge: veto={ind.veto_judges} 조언={ind.advisory} common-mode={ind.common_mode}")
+    print(f"   → {ind.note[:90]}")
+    rc = attack_recombination_logic("evidence")
+    print(f"   evidence 오염: 영향받는 조언={rc.affected_judges} · veto보존={rc.veto_preserves}")
 
     print("\n③ OODA — Orient 마비 + 속도경쟁")
     od = orient_phase_denial(3)
