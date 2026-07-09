@@ -50,6 +50,21 @@ OBJECTIVES = {
     "baro_spoof": ["baro_spoof"],                    # S57: 기압계 스푸핑
     "mag_spoof": ["mag_spoof"],                      # S58: 지자기 스푸핑
     "airspeed_spoof": ["airspeed_spoof"],            # S59: 에어스피드 스푸핑
+    # ── 지상 세그먼트 소프트웨어(S72~S85) — UAV Sentinel 미감시 = 사각지대 ──
+    "gcs_mission_parse": ["gcs_mission_parse"],      # S72: 악성 미션파일 파싱
+    "gcs_plugin_inject": ["gcs_plugin_inject"],      # S73: QML/플러그인 인젝션
+    "gcs_update_mitm": ["gcs_update_mitm"],          # S74: 자동업데이트 MITM
+    "gcs_config_tamper": ["gcs_config_tamper"],      # S75: 설정/로그 변조
+    "ros_master_access": ["ros_master_access"],      # S76: 무인증 ROS 마스터
+    "ros_topic_inject": ["ros_topic_inject"],        # S77: ROS 토픽 인젝션
+    "mavros_cmd_inject": ["mavros_cmd_inject"],      # S78: MAVROS 명령 주입
+    "modem_firmware": ["modem_firmware"],            # S79: 모뎀/SATCOM 펌웨어
+    "telemetry_relay_mitm": ["telemetry_relay_mitm"],  # S80: 릴레이 MITM
+    "gdt_ntp_spoof": ["gdt_ntp_spoof"],              # S81: GDT NTP 스푸핑
+    "fleet_api_bypass": ["fleet_api_bypass"],        # S82: 함대 API 인증우회
+    "telemetry_poison": ["telemetry_poison"],        # S83: 텔레메트리 수집 오염
+    "video_stream_hijack": ["video_stream_hijack"],  # S84: 영상스트림 하이재킹
+    "c4i_inject": ["c4i_inject"],                    # S85: C4I 메시지 주입
 }
 
 # 연속 액션의 '효과 바닥' — 이 미만이면 효과 미달. blue 임계와의 관계가 회피창을 정함.
