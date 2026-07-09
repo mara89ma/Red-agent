@@ -204,20 +204,20 @@ RED_COVER: Dict[str, str] = {
     "T0843": "S14 taint + §G 편대 전파(program download)",
     "T1560": "S37 스테이징 + §N 아카이브 번들(collected data)",
     # 신규 IT 계층(팀 매트릭스엔 없지만 우리가 추가) — S48~S55 는 위 T1190/T1068 등에 매핑됨.
-    # 보강 구현(S56~S62) — 커버리지 최대화, 실 아티팩트로 구현.
-    "T1572": "S56 C2 터널링(SATCOM 캡슐화, §K covert_c2)",
-    "T1573": "S56 C2 암호채널(XOR, §K covert_c2)",
-    "T1001": "S56 C2 난독(더미 인터리브, §K covert_c2)",
-    "T1132": "S56 C2 인코딩(base64, §K covert_c2)",
-    "T0809": "S57 데이터 파괴(§N advanced)",
-    "T1485": "S57 데이터 파괴(§N advanced)",
-    "T1014": "S58 rootkit(§N advanced)",
-    "T0851": "S58 rootkit-inhibit(§N advanced)",
-    "T0800": "S59 FW 업데이트 모드 강제(§N advanced)",
-    "T1556": "S60 인증 프로세스 변조(§N advanced)",
-    "T1011": "S61 유출-SATCOM 대체매체(§N advanced)",
-    "T1567": "S61 유출-REST 웹서비스(§N advanced)",
-    "T0882": "S62 작전정보 탈취(§N advanced)",
+    # 보강 구현(S65~S71) — 커버리지 최대화, 실 아티팩트로 구현.
+    "T1572": "S65 C2 터널링(SATCOM 캡슐화, §K covert_c2)",
+    "T1573": "S65 C2 암호채널(XOR, §K covert_c2)",
+    "T1001": "S65 C2 난독(더미 인터리브, §K covert_c2)",
+    "T1132": "S65 C2 인코딩(base64, §K covert_c2)",
+    "T0809": "S66 데이터 파괴(§N advanced)",
+    "T1485": "S66 데이터 파괴(§N advanced)",
+    "T1014": "S67 rootkit(§N advanced)",
+    "T0851": "S67 rootkit-inhibit(§N advanced)",
+    "T0800": "S68 FW 업데이트 모드 강제(§N advanced)",
+    "T1556": "S69 인증 프로세스 변조(§N advanced)",
+    "T1011": "S70 유출-SATCOM 대체매체(§N advanced)",
+    "T1567": "S70 유출-REST 웹서비스(§N advanced)",
+    "T0882": "S71 작전정보 탈취(§N advanced)",
     # 수동 수집·심화 정찰 실 구현(S63~S64) — red 수행 O, blue 로그 없음(사각).
     "T1125": "S63 영상 수동 도청(§N collection)",
     "T1119": "S63 자동 수집(§N collection)",
@@ -308,7 +308,7 @@ def verified_summary() -> dict:
     def is_callable_artifact(tid: str) -> bool:
         # ARTIFACT_REGISTRY(23) OR craft 함수(S48~S64) OR core action(MAP).
         return (tid in art or tid in map_ids
-                or bool(re.search(r"S(4[89]|5[0-9]|6[0-4])", RED_COVER[tid])))
+                or bool(re.search(r"S(4[89]|5[0-9]|6[0-9]|7[01])", RED_COVER[tid])))
 
     verified = [t for t in covered if is_callable_artifact(t)]
     return {
