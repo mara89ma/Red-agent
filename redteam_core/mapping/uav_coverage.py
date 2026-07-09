@@ -204,6 +204,20 @@ RED_COVER: Dict[str, str] = {
     "T0843": "S14 taint + §G 편대 전파(program download)",
     "T1560": "S37 스테이징 + §N 아카이브 번들(collected data)",
     # 신규 IT 계층(팀 매트릭스엔 없지만 우리가 추가) — S48~S55 는 위 T1190/T1068 등에 매핑됨.
+    # 보강 구현(S56~S62) — 커버리지 최대화, 실 아티팩트로 구현.
+    "T1572": "S56 C2 터널링(SATCOM 캡슐화, §K covert_c2)",
+    "T1573": "S56 C2 암호채널(XOR, §K covert_c2)",
+    "T1001": "S56 C2 난독(더미 인터리브, §K covert_c2)",
+    "T1132": "S56 C2 인코딩(base64, §K covert_c2)",
+    "T0809": "S57 데이터 파괴(§N advanced)",
+    "T1485": "S57 데이터 파괴(§N advanced)",
+    "T1014": "S58 rootkit(§N advanced)",
+    "T0851": "S58 rootkit-inhibit(§N advanced)",
+    "T0800": "S59 FW 업데이트 모드 강제(§N advanced)",
+    "T1556": "S60 인증 프로세스 변조(§N advanced)",
+    "T1011": "S61 유출-SATCOM 대체매체(§N advanced)",
+    "T1567": "S61 유출-REST 웹서비스(§N advanced)",
+    "T0882": "S62 작전정보 탈취(§N advanced)",
 }
 
 # 미커버 기법 분류: 'excluded'=의도적 범위 밖 / 'reinforce'=보강 후보.

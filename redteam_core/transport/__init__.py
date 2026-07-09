@@ -11,6 +11,9 @@ NotImplementedError 스캐폴드). 이 층은 **실제로 소켓/HTTP 로 나가
 명시 지정해야 하며, 시험창·허가 환경에서만 사용.
 """
 from .c2_channel import C2Beacon, C2Listener, PersistentBeacon, Tasking
+from .covert_c2 import (
+    CovertFrame, encode_c2, encrypt_c2, obfuscate_c2, tunnel_c2, roundtrip_ok,
+)
 from .delivery import (
     build_mavlink_gps_frame, build_mavlink_mission_item_frame,
     build_mavlink_param_set_frame, http_deliver, udp_deliver,

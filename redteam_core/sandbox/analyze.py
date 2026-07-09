@@ -71,8 +71,47 @@ def _idor(p) -> AnalyzeReport:
                          verdict="benign", blind_spot=True)
 
 
+def _keyword(p, keys, label) -> AnalyzeReport:
+    r = AnalyzeReport(p.scenario, p.kind)
+    blob = str(p.data)
+    if any(k in blob for k in keys):
+        r.indicators.append(label)
+        r.verdict = "malicious"
+    return r
+
+
+def _destruction(p):
+    return _keyword(p, ("rm -rf", "rm ", "wipe", "shred", "delete"), "데이터 파괴(로그·임무·SAR)")
+
+
+def _rootkit(p):
+    return _keyword(p, ("ld.so.preload", "insmod", ".ko", "hook", "hide"), "rootkit 설치(은폐)")
+
+
+def _fw_mode(p):
+    return _keyword(p, ("bootloader", "246", "reboot"), "FW 업데이트 모드 강제(제어 중단)")
+
+
+def _auth_modify(p):
+    return _keyword(p, ("always-pass", "return True", "verify"), "인증 로직 변조(백도어)")
+
+
+def _exfil_alt(p):
+    r = AnalyzeReport(p.scenario, p.kind)
+    ch = p.data.get("channel") if isinstance(p.data, dict) else ""
+    r.indicators.append(f"대체매체 유출({ch}) — blue 용량/페이로드 미포착(사각)")
+    r.verdict = "suspicious"; r.blind_spot = True       # 전용 로그 없음
+    return r
+
+
+def _theft(p):
+    return _keyword(p, ("EO/IR", "SAR", "copy", "targets"), "작전정보(영상·표적) 탈취")
+
+
 _DISPATCH = {"upload": _upload, "escape": _escape,
-             "suid": _suid, "cron": _cron, "idor": _idor}
+             "suid": _suid, "cron": _cron, "idor": _idor,
+             "destruction": _destruction, "rootkit": _rootkit, "fw_mode": _fw_mode,
+             "auth_modify": _auth_modify, "exfil_alt": _exfil_alt, "theft": _theft}
 
 
 def analyze(payload) -> AnalyzeReport:
