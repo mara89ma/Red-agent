@@ -118,6 +118,11 @@ UAV_MATRIX: List[Tuple[str, str, str, bool]] = [
     ("Impact", "T1495", "Firmware Corruption", True),
     ("Impact", "T1485", "Data Destruction", False),
     ("Impact", "T1531", "Account Access Removal", True),
+    # ── UAV 특화 신규 기법(§V WiFi·§W RC/모터·§Z 센서가 사용하나 팀 매트릭스에 없던 것) ──
+    ("Impair Process Control", "T0855", "Unauthorized Command Message", False),
+    ("Lateral Movement", "T1552", "Unsecured Credentials", False),
+    ("Lateral Movement", "T1555", "Credentials from Password Stores", False),
+    ("Stealth/Evasion", "T1600", "Weaken Encryption", False),
 ]
 
 # 기법ID → 우리 RED 가 실제로 공격하는 시나리오/모듈. (미기재 = 갭)
@@ -227,7 +232,23 @@ RED_COVER: Dict[str, str] = {
     "T1056": "S63 키입력 가로채기(§N collection)",
     "T1590": "S64 네트워크 구조 정찰(§N collection)",
     "T1596": "S64 CVE DB 검색(§Q cve_intel)",
+    # UAV 특화 신규 기법 매핑(마이터 매트릭스 신규 반영).
+    "T0855": "S44 RC override 명령 주입(§W)",
+    "T1552": "S42 WiFi 기본 자격증명(§V)",
+    "T1555": "S43 RC 링크 바인딩 자격 탈취(§W)",
+    "T1600": "S45 RC 프로토콜 다운그레이드(§W)",
 }
+
+# 미매핑 시나리오를 기존 기법 라벨에 병기(시나리오 반영, 커버리지 % 불변).
+for _tid, _extra in {
+    "T1557": " / S40 WiFi Evil Twin(§V)",
+    "T1498": " / S41 WiFi 재밍(§V)",
+    "T0831": " / S46 DShot/ESC 모터 조작(§W)",
+    "T0806": " / S56~S59 다중센서 폴트(§Z)",
+    "T0835": " / S56~S59 센서 EKF 기만(§Z)",
+}.items():
+    if _tid in RED_COVER:
+        RED_COVER[_tid] += _extra
 
 # 미커버 기법 분류: 'excluded'=진짜 불가능(공격자 자기 인프라만).
 # SOFT 제외(수동수집·정찰)는 S63~S64 로 실 구현해 커버로 전환 → 제외에서 제거.
