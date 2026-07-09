@@ -296,6 +296,30 @@ def hero_set() -> List[Tuple[str, str, str]]:
             if not det and tid in RED_COVER]
 
 
+def verified_summary() -> dict:
+    """커버 기법의 근거 강도: 실 아티팩트/액션 호출가능 vs 시나리오 백엔드."""
+    import re
+    from .artifacts import artifact_backed
+    from .attack_d3fend import MAP
+    map_ids = {t for s in MAP.values() for t in s.get("attack_ics", [])}
+    art = artifact_backed()
+    covered = [tid for _, tid, _, _ in UAV_MATRIX if tid in RED_COVER]
+
+    def is_callable_artifact(tid: str) -> bool:
+        # ARTIFACT_REGISTRY(23) OR craft 함수(S48~S64) OR core action(MAP).
+        return (tid in art or tid in map_ids
+                or bool(re.search(r"S(4[89]|5[0-9]|6[0-4])", RED_COVER[tid])))
+
+    verified = [t for t in covered if is_callable_artifact(t)]
+    return {
+        "covered": len(covered),
+        "callable_artifact": len(verified),          # 호출→산출물 확인 가능
+        "scenario_backed": len(covered) - len(verified),  # 캠페인/assess 로 실행되는 실 시나리오
+        "callable_pct": round(100 * len(verified) / len(covered), 1) if covered else 0.0,
+        "no_pure_label": all(is_callable_artifact(t) or re.search(r"S[0-9]", RED_COVER[t]) for t in covered),
+    }
+
+
 def gaps_by_scope() -> Dict[str, List[Tuple[str, str, str]]]:
     """미커버 기법을 excluded(범위 밖)/reinforce(보강 후보)/unclassified 로 분류."""
     out: Dict[str, List[Tuple[str, str, str]]] = {"excluded": [], "reinforce": [], "unclassified": []}
