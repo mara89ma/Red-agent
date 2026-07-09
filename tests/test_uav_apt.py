@@ -24,7 +24,7 @@ def test_turla_satellite_c2_chain():
 
 def test_rq170_gnss_hijack_chain():
     r = run_uav_apt("RQ-170 GNSS Hijack (Iran 2011)")
-    assert "S30" in r.chain and "S1" in r.chain          # 재밍 + 스푸핑
+    assert "S30" in r.chain and "S61" in r.chain         # 재밍 + GNSS 나포(S61)
     assert r.chain[-1] == "S20"                          # 강제착륙(Failsafe 억제)
 
 

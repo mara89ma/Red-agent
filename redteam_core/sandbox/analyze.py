@@ -123,11 +123,36 @@ def _recon(p):
     return r
 
 
+def _sat_c2(p):
+    # 위성 링크 C2 하이재킹(Turla) — 합법 세션 편승, 콘텐츠 검사 회피 → 사각.
+    r = AnalyzeReport(p.scenario, p.kind)
+    r.indicators.append("위성 링크 C2 하이재킹(Turla) — 합법 세션 편승, blue 사각")
+    r.verdict = "suspicious"; r.blind_spot = True
+    return r
+
+
+def _gnss_capture(p):
+    r = AnalyzeReport(p.scenario, p.kind)
+    n = p.data.get("steps", 0) if isinstance(p.data, dict) else 0
+    r.indicators.append(f"GNSS walk-off 스푸핑 {n}단계 → 유도착륙/나포(통제 조작)")
+    r.verdict = "malicious"                    # blue S1 룰이 스푸핑 편차 탐지 가능
+    return r
+
+
+def _ekf_fault(p):
+    r = AnalyzeReport(p.scenario, p.kind)
+    acc = p.data.get("ekf_accepted", []) if isinstance(p.data, dict) else []
+    r.indicators.append(f"다중센서 협조 폴트 — EKF 게이트 통과 {acc} (은밀 무력화)")
+    r.verdict = "suspicious"; r.blind_spot = True   # EKF 게이트 아래 = 은밀
+    return r
+
+
 _DISPATCH = {"upload": _upload, "escape": _escape,
              "suid": _suid, "cron": _cron, "idor": _idor,
              "destruction": _destruction, "rootkit": _rootkit, "fw_mode": _fw_mode,
              "auth_modify": _auth_modify, "exfil_alt": _exfil_alt, "theft": _theft,
-             "collection": _collection, "recon": _recon}
+             "collection": _collection, "recon": _recon,
+             "sat_c2": _sat_c2, "gnss_capture": _gnss_capture, "ekf_fault": _ekf_fault}
 
 
 def analyze(payload) -> AnalyzeReport:

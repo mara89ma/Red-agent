@@ -24,6 +24,7 @@ from .archive import (
 )
 from .advanced import ADVANCED_SCENARIOS
 from .collection import COLLECTION_SCENARIOS
+from .uav_novel import NOVEL_SCENARIOS
 
 __all__ = [
     "CONVERTERS", "generate_prompt_injections",

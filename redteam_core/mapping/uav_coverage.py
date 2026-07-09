@@ -123,6 +123,7 @@ UAV_MATRIX: List[Tuple[str, str, str, bool]] = [
     ("Lateral Movement", "T1552", "Unsecured Credentials", False),
     ("Lateral Movement", "T1555", "Credentials from Password Stores", False),
     ("Stealth/Evasion", "T1600", "Weaken Encryption", False),
+    ("Command and Control", "T1090.002", "External Proxy (위성 링크 C2, Turla)", False),
 ]
 
 # 기법ID → 우리 RED 가 실제로 공격하는 시나리오/모듈. (미기재 = 갭)
@@ -237,15 +238,17 @@ RED_COVER: Dict[str, str] = {
     "T1552": "S42 WiFi 기본 자격증명(§V)",
     "T1555": "S43 RC 링크 바인딩 자격 탈취(§W)",
     "T1600": "S45 RC 프로토콜 다운그레이드(§W)",
+    # 신규 시나리오 S60~S62 (APT 에뮬레이션 도출).
+    "T1090.002": "S60 위성 링크 C2 하이재킹(Turla, §N uav_novel)",
 }
 
 # 미매핑 시나리오를 기존 기법 라벨에 병기(시나리오 반영, 커버리지 % 불변).
 for _tid, _extra in {
     "T1557": " / S40 WiFi Evil Twin(§V)",
     "T1498": " / S41 WiFi 재밍(§V)",
-    "T0831": " / S46 DShot/ESC 모터 조작(§W)",
+    "T0831": " / S46 DShot/ESC 모터 조작(§W) / S61 GNSS 스푸핑 나포(RQ-170)",
     "T0806": " / S56~S59 다중센서 폴트(§Z)",
-    "T0835": " / S56~S59 센서 EKF 기만(§Z)",
+    "T0835": " / S56~S59 센서 EKF 기만(§Z) / S62 EKF 협조 폴트",
 }.items():
     if _tid in RED_COVER:
         RED_COVER[_tid] += _extra
