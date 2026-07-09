@@ -44,11 +44,11 @@ _SCENARIO_STATIC = {
     "S53": None, "S54": None, "S55": None,
     # 다중센서 폴트인젝션(S56~S59, §Z) — EKF 계층 전용 탐지룰 미배포 = 사각지대.
     "S56": None, "S57": None, "S58": None, "S59": None,
-    # 지상 세그먼트 소프트웨어(S72~S85) — UAV Sentinel 텔레메트리 평면 미감시 = 사각지대.
-    "S72": None, "S73": None, "S74": None, "S75": None,   # GCS 앱
-    "S76": None, "S77": None, "S78": None,                # 컴패니언/ROS
-    "S79": None, "S80": None, "S81": None,                # 데이터링크
-    "S82": None, "S83": None, "S84": None, "S85": None,   # 클라우드
+    # 지상 세그먼트 소프트웨어(S86~S99) — UAV Sentinel 텔레메트리 평면 미감시 = 사각지대.
+    "S86": None, "S87": None, "S88": None, "S89": None,   # GCS 앱
+    "S90": None, "S91": None, "S92": None,                # 컴패니언/ROS
+    "S93": None, "S94": None, "S95": None,                # 데이터링크
+    "S96": None, "S97": None, "S98": None, "S99": None,   # 클라우드
 }
 
 # 캠페인 체인(신규 C8~C10 포함). C1~C7 은 대조용 일부만.
@@ -69,8 +69,8 @@ CHAINS = {
     "C17": ["S53", "S49", "S17"],        # 아카이브 전달→웹셸→SAR 유출
     "C18": ["S48", "S11"],               # 인증우회(IDOR)→무장(범주형 견고차단 실증)
     # ── 신규 C19~C20: 지상 세그먼트 소프트웨어 킬체인(전부 Sentinel 사각) ──
-    "C19": ["S72", "S78", "S85"],        # GCS 악성미션→MAVROS 명령주입→C4I 위조명령(지상 관통)
-    "C20": ["S82", "S83", "S84"],        # 함대API 인증우회→텔레메트리 오염→영상스트림 하이재킹
+    "C19": ["S86", "S92", "S99"],        # GCS 악성미션→MAVROS 명령주입→C4I 위조명령(지상 관통)
+    "C20": ["S96", "S97", "S98"],        # 함대API 인증우회→텔레메트리 오염→영상스트림 하이재킹
 }
 
 

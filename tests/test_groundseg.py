@@ -8,7 +8,7 @@ from redteam_core.groundseg import GROUND_SCENARIOS, build_artifact, run_ground,
 
 def test_scenarios_span_four_surfaces():
     assert set(surfaces()) == {"gcs", "ros", "datalink", "cloud"}
-    assert set(GROUND_SCENARIOS) == {f"S{n}" for n in range(72, 86)}
+    assert set(GROUND_SCENARIOS) == {f"S{n}" for n in range(86, 100)}
 
 
 def test_objectives_registered():
@@ -17,15 +17,15 @@ def test_objectives_registered():
 
 
 def test_artifacts_built_per_surface():
-    assert "passwd" in build_artifact("S72")          # 경로순회 미션파일
-    assert "rostopic pub" in build_artifact("S78")    # MAVROS 주입
-    assert "RTSP" in build_artifact("S84")            # 영상 하이재킹
-    assert "IDOR" in build_artifact("S82")            # 함대 API
+    assert "passwd" in build_artifact("S86")          # 경로순회 미션파일
+    assert "rostopic pub" in build_artifact("S92")    # MAVROS 주입
+    assert "RTSP" in build_artifact("S98")            # 영상 하이재킹
+    assert "IDOR" in build_artifact("S96")            # 함대 API
 
 
 def test_ground_is_sentinel_blindspot():
     # 지상 세그먼트는 UAV Sentinel 미감시 → 전부 사각지대 은밀 달성.
-    for sid in ("S72", "S76", "S80", "S85"):
+    for sid in ("S86", "S90", "S94", "S99"):
         obj = GROUND_SCENARIOS[sid]["objective"]
         r = adaptive_engage(obj)
         assert r.verdict == "achieved" and r.trace[-1][2].detected is None
@@ -37,4 +37,4 @@ def test_ground_killchains_stealthy():
 
 
 def test_dry_no_transmission():
-    assert run_ground("S72", dry=True).transmitted is False
+    assert run_ground("S86", dry=True).transmitted is False

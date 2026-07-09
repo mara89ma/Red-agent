@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""지상 세그먼트 공격 데모 — GCS·ROS·데이터링크·클라우드 (S72~S85).
+"""지상 세그먼트 공격 데모 — GCS·ROS·데이터링크·클라우드 (S86~S99).
 
     python benchmarks/groundseg_eval.py
 

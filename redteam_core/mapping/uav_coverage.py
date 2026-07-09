@@ -258,6 +258,29 @@ for _tid, _extra in {
     if _tid in RED_COVER:
         RED_COVER[_tid] += _extra
 
+# 지상 세그먼트 소프트웨어(S86~S99) — 매트릭스 보강: 기체 외 GCS·ROS·데이터링크·클라우드.
+# 전부 UAV Sentinel(텔레메트리 평면) 미감시 = ❌(탐지불가) → 히어로셋(은밀 공격).
+UAV_MATRIX += [
+    ("Execution", "T1203", "Exploitation for Client Execution (GCS 파서)", False),
+    ("Initial Access", "T1195.002", "Supply Chain: Software (GCS 업데이트)", False),
+    ("Persistence", "T0857", "Firmware (모뎀/SATCOM 터미널)", False),
+    ("Impact", "T1565.001", "Stored Data Manipulation (텔레메트리 수집)", False),
+]
+for _gt, _gn in {
+    "T1203": "S86 GCS 악성 미션파일 파싱",
+    "T1059": "S87 GCS QML/플러그인 인젝션",
+    "T1195.002": "S88 GCS 자동업데이트 MITM",
+    "T1565": "S89 GCS 설정변조 / S99 C4I 위조명령",
+    "T1190": "S90 무인증 ROS 마스터 / S96 함대API 인증우회",
+    "T0855": "S91 ROS 토픽/서비스 인젝션",
+    "T0831": "S92 MAVROS 명령주입",
+    "T0857": "S93 모뎀/SATCOM 펌웨어",
+    "T1557": "S94 텔레메트리 릴레이 MITM / S98 RTSP 하이재킹",
+    "T1195": "S95 GDT NTP 스푸핑",
+    "T1565.001": "S97 텔레메트리 수집 오염",
+}.items():
+    RED_COVER[_gt] = (RED_COVER[_gt] + " / " + _gn) if _gt in RED_COVER else _gn
+
 # 미커버 기법 분류: 'excluded'=진짜 불가능(공격자 자기 인프라만).
 # SOFT 제외(수동수집·정찰)는 S63~S64 로 실 구현해 커버로 전환 → 제외에서 제거.
 GAP_SCOPE: Dict[str, str] = {
